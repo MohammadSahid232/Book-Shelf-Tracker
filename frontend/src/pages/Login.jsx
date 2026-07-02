@@ -1,18 +1,27 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Form from '../components/Form';
+import { useAuth } from '../context/AuthContext';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
+  const { login } = useAuth();
+  const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!email || !password) return;
+    
+    // Simulate login
+    login(email);
     setMessage(`Logged in successfully as ${email}`);
-    setEmail('');
-    setPassword('');
+    
+    // Redirect to home after a brief delay
+    setTimeout(() => {
+        navigate('/');
+    }, 1000);
   };
 
   const loginFields = [
