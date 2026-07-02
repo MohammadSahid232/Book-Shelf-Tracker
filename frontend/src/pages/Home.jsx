@@ -1,53 +1,34 @@
 import React from 'react';
-import BookCard from '../components/BookCard';
+import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 function Home() {
-  const books = [
-    { id: 1, title: 'The Great Gatsby', author: 'F. Scott Fitzgerald', status: 'Want to Read' },
-    { id: 2, title: '1984', author: 'George Orwell', status: 'Want to Read' },
-    { id: 3, title: 'To Kill a Mockingbird', author: 'Harper Lee', status: 'Reading' },
-    { id: 4, title: 'Pride and Prejudice', author: 'Jane Austen', status: 'Reading' },
-    { id: 5, title: 'The Catcher in the Rye', author: 'J.D. Salinger', status: 'Finished' },
-    { id: 6, title: 'The Hobbit', author: 'J.R.R. Tolkien', status: 'Finished' },
-  ];
-
-  const wantToReadBooks = books.filter(b => b.status === 'Want to Read');
-  const readingBooks = books.filter(b => b.status === 'Reading');
-  const finishedBooks = books.filter(b => b.status === 'Finished');
+  const { user } = useAuth();
 
   return (
-    <div className="min-h-screen bg-base-200 p-8">
-      <h1 className="text-3xl font-bold mb-8 text-center">My Bookshelf Tracker</h1>
-      
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {/* Want to Read Column */}
-        <div className="flex flex-col">
-          <h2 className="text-xl font-semibold mb-4 text-center border-b-2 border-primary pb-2">Want to Read</h2>
-          <div className="flex-1">
-            {wantToReadBooks.map(book => (
-              <BookCard key={book.id} book={book} />
-            ))}
-          </div>
-        </div>
-
-        {/* Reading Column */}
-        <div className="flex flex-col">
-          <h2 className="text-xl font-semibold mb-4 text-center border-b-2 border-secondary pb-2">Reading</h2>
-          <div className="flex-1">
-            {readingBooks.map(book => (
-              <BookCard key={book.id} book={book} />
-            ))}
-          </div>
-        </div>
-
-        {/* Finished Column */}
-        <div className="flex flex-col">
-          <h2 className="text-xl font-semibold mb-4 text-center border-b-2 border-accent pb-2">Finished</h2>
-          <div className="flex-1">
-            {finishedBooks.map(book => (
-              <BookCard key={book.id} book={book} />
-            ))}
-          </div>
+    <div className="min-h-screen bg-gray-50 dark:bg-neutral-900 flex flex-col items-center justify-center text-center px-4 py-16">
+      <div className="max-w-3xl">
+        <h1 className="text-5xl md:text-6xl font-extrabold text-slate-900 dark:text-slate-50 tracking-tight mb-6">
+          Track Your Reading Journey with <span className="text-blue-600">Book Tracker</span>
+        </h1>
+        <p className="text-lg md:text-xl text-slate-600 dark:text-slate-400 mb-8 max-w-2xl mx-auto">
+          Organize your personal library, log your progress, and list books to read, currently reading, or finished. Entirely free and built for book lovers.
+        </p>
+        <div className="flex gap-4 justify-center">
+          {user ? (
+            <Link to="/dashboard" className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md shadow-md transition-colors">
+              Go to Dashboard
+            </Link>
+          ) : (
+            <>
+              <Link to="/login" className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md shadow-md transition-colors">
+                Sign In
+              </Link>
+              <Link to="/register" className="px-6 py-3 bg-white dark:bg-neutral-800 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-neutral-700 font-semibold rounded-md hover:bg-gray-100 dark:hover:bg-neutral-700 transition-colors">
+                Create Account
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </div>
