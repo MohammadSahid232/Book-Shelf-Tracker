@@ -3,7 +3,7 @@ import { Outlet, Link } from 'react-router-dom';
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 
-const AdminLayout = () => {
+const AdminLayout = ({ children }) => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     return (
@@ -21,7 +21,7 @@ const AdminLayout = () => {
                     <div className="h-full px-4 py-6 overflow-y-auto">
                         <ul className="space-y-2 text-sm font-medium text-slate-800 dark:text-slate-200">
                             <li>
-                                <Link to="/" className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-neutral-700 transition-colors">
+                                <Link to="/dashboard" className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-neutral-700 transition-colors">
                                     <svg xmlns="http://www.w3.org/2000/svg" className="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                                     </svg>
@@ -70,7 +70,7 @@ const AdminLayout = () => {
 
                 {/* Main Content Area */}
                 <main className="flex-1 min-h-[calc(100vh-78px)] p-6 overflow-y-auto">
-                    <Outlet />
+                    {children || <Outlet />}
                 </main>
             </div>
 
