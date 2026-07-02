@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import Form from '../components/Form';
 
 export default function Register() {
   const [name, setName] = useState('');
@@ -16,51 +17,40 @@ export default function Register() {
     setPassword('');
   };
 
+  const registerFields = [
+    {
+      name: 'name',
+      label: 'Full Name',
+      type: 'text',
+      placeholder: 'Enter your name',
+      value: name,
+      onChange: (e) => setName(e.target.value)
+    },
+    {
+      name: 'email',
+      label: 'Email',
+      type: 'email',
+      placeholder: 'Enter your email',
+      value: email,
+      onChange: (e) => setEmail(e.target.value)
+    },
+    {
+      name: 'password',
+      label: 'Password',
+      type: 'password',
+      placeholder: 'Create a password',
+      value: password,
+      onChange: (e) => setPassword(e.target.value)
+    }
+  ];
+
   return (
     <div className="min-h-screen bg-base-200 flex items-center justify-center p-4">
       <div className="max-w-md w-full bg-base-100 p-8 rounded-xl shadow-xl">
         <h2 className="text-2xl font-bold text-center mb-6">Register</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="label">
-              <span className="label-text">Full Name</span>
-            </label>
-            <input
-              type="text"
-              placeholder="Enter your name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="input input-bordered w-full"
-            />
-          </div>
-          <div>
-            <label className="label">
-              <span className="label-text">Email</span>
-            </label>
-            <input
-              type="email"
-              placeholder="Enter your email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="input input-bordered w-full"
-            />
-          </div>
-          <div>
-            <label className="label">
-              <span className="label-text">Password</span>
-            </label>
-            <input
-              type="password"
-              placeholder="Create a password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="input input-bordered w-full"
-            />
-          </div>
-          <button type="submit" className="btn btn-primary w-full">
-            Register
-          </button>
-        </form>
+        
+        <Form onSubmit={handleSubmit} fields={registerFields} submitText="Register" />
+
         {message && (
           <p className="mt-4 p-3 bg-success/20 text-success rounded-lg text-center font-medium">
             {message}
