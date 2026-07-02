@@ -79,7 +79,7 @@ export default function Register() {
             </button>
           </form>
 
-          <div className="mt-6 text-slate-900 text-sm text-center dark:text-slate-50">Already have an account? 
+          <div className="mt-6 text-slate-900 text-sm text-center dark:text-slate-50">Already have an account?
             <Link to="/login" className="text-blue-700 hover:underline ml-1 font-medium dark:text-blue-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded">
               Login here
             </Link>

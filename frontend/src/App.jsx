@@ -3,21 +3,26 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
-import Header from './components/header';
-import Footer from './components/Footer';
+import AdminLayout from './layouts/AdminLayout';
+import PublicLayout from './layouts/PublicLayout';
 import { AuthProvider } from './context/AuthContext';
 
 function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
-        <Header />
         <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+          {/* Dashboard / Admin Routes */}
+          <Route element={<AdminLayout />}>
+            <Route path="/" element={<Home />} />
+          </Route>
+
+          {/* Public / Auth Routes */}
+          <Route element={<PublicLayout />}>
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+          </Route>
         </Routes>
-        <Footer />
       </BrowserRouter>
     </AuthProvider>
   );
