@@ -7,43 +7,33 @@ const ThemeToggle = () => {
     const root = document.documentElement;
 
     if (isDarkMode) {
-      // Dark: BookShelf image — dark forest olive green + orange accents
       root.classList.add("dark");
       localStorage.setItem("theme", "dark");
-      root.style.setProperty("--color-bg",            "#1a2415");
-      root.style.setProperty("--color-surface",        "#243020");
-      root.style.setProperty("--color-border",         "#3a5030");
-      root.style.setProperty("--color-text",           "#f0ede5");
-      root.style.setProperty("--color-text-muted",     "#9aac80");
-      root.style.setProperty("--color-primary",        "#e8843a");
-      root.style.setProperty("--color-primary-hover",  "#c8601a");
-      root.style.setProperty("--color-secondary",      "#f0a060");
-      root.style.setProperty("--color-accent",         "#f5b880");
-      root.style.setProperty("--color-badge-bg",       "#3a5030");
-      root.style.setProperty("--color-badge-text",     "#f0a060");
-      root.style.setProperty("--color-card-hover",     "#2e3e28");
-      root.style.setProperty("--color-star",           "#f5c040");
-      root.style.setProperty("--color-danger",         "#e05050");
-      root.style.setProperty("--color-danger-hover",   "#1f0f0f");
+      root.style.setProperty("--color-primary", "#3b82f6");
+      root.style.setProperty("--color-primary-hover", "#2563eb");
+      root.style.setProperty("--color-secondary", "#60a5fa");
+      root.style.setProperty("--color-bg", "#0b1120");
+      root.style.setProperty("--color-surface", "#111827");
+      root.style.setProperty("--color-border", "#1e3a5f");
+      root.style.setProperty("--color-text", "#e2e8f0");
+      root.style.setProperty("--color-text-muted", "#94a3b8");
+      root.style.setProperty("--color-badge-bg", "#1e3a5f");
+      root.style.setProperty("--color-badge-text", "#93c5fd");
+      root.style.setProperty("--color-card-hover", "#1a2744");
     } else {
-      // Light: warm off-white + olive green + orange accents
       root.classList.remove("dark");
       localStorage.setItem("theme", "light");
-      root.style.setProperty("--color-bg",            "#f5f0e8");
-      root.style.setProperty("--color-surface",        "#ffffff");
-      root.style.setProperty("--color-border",         "#d6c9a8");
-      root.style.setProperty("--color-text",           "#1a1f0f");
-      root.style.setProperty("--color-text-muted",     "#5a6a40");
-      root.style.setProperty("--color-primary",        "#c8601a");
-      root.style.setProperty("--color-primary-hover",  "#a84e14");
-      root.style.setProperty("--color-secondary",      "#e8843a");
-      root.style.setProperty("--color-accent",         "#f0a060");
-      root.style.setProperty("--color-badge-bg",       "#fde9d4");
-      root.style.setProperty("--color-badge-text",     "#c8601a");
-      root.style.setProperty("--color-card-hover",     "#fdf3e7");
-      root.style.setProperty("--color-star",           "#e8a020");
-      root.style.setProperty("--color-danger",         "#c0392b");
-      root.style.setProperty("--color-danger-hover",   "#fdf0ee");
+      root.style.setProperty("--color-primary", "#1d4ed8");
+      root.style.setProperty("--color-primary-hover", "#1e40af");
+      root.style.setProperty("--color-secondary", "#3b82f6");
+      root.style.setProperty("--color-bg", "#f0f4ff");
+      root.style.setProperty("--color-surface", "#ffffff");
+      root.style.setProperty("--color-border", "#c7d4f0");
+      root.style.setProperty("--color-text", "#1e2a4a");
+      root.style.setProperty("--color-text-muted", "#64748b");
+      root.style.setProperty("--color-badge-bg", "#dbeafe");
+      root.style.setProperty("--color-badge-text", "#1d4ed8");
+      root.style.setProperty("--color-card-hover", "#eff6ff");
     }
   }, [isDarkMode]);
 
