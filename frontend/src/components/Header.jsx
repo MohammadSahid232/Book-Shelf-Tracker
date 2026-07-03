@@ -1,30 +1,40 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import ThemeToggle from './ThemeToggle';
 
 const Header = () => {
     const { user, logout } = useAuth();
 
     return (
-        <div className="navbar bg-blue-200 p-5 shadow-sm">
-            <div className="flex-1">
-                <Link to={user ? "/dashboard" : "/"} className="btn btn-ghost text-xl font-bold">Book Tracker</Link>
-            </div>
-            <div className="flex-none gap-2">
+        <div className="app-navbar">
+            <Link to={user ? "/dashboard" : "/"} className="app-navbar-brand">
+                📚 Book Tracker
+            </Link>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <ThemeToggle />
                 {user ? (
                     <>
-                        <span className="font-semibold text-gray-700 mr-4">Welcome, {user.name}</span>
-                        <button onClick={logout} className="btn btn-ghost text-error">Logout</button>
+                        <span style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)', fontWeight: 600 }}>
+                            Welcome, {user.name}
+                        </span>
+                        <button
+                            onClick={logout}
+                            style={{ fontSize: '0.875rem', color: 'var(--color-danger)', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}
+                        >
+                            Logout
+                        </button>
                     </>
                 ) : (
                     <>
-                        <Link to="/login" className="btn btn-ghost">Login</Link>
-                        <Link to="/register" className="btn btn-primary">Register</Link>
+                        <Link to="/login" style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)', textDecoration: 'none', fontWeight: 500 }}>Login</Link>
+                        <Link to="/register" style={{ fontSize: '0.875rem', color: '#fff', background: 'var(--color-primary)', padding: '0.35rem 0.85rem', borderRadius: '0.4rem', textDecoration: 'none', fontWeight: 600 }}>Register</Link>
                     </>
                 )}
             </div>
         </div>
-    )
-}
+    );
+};
 
 export default Header;

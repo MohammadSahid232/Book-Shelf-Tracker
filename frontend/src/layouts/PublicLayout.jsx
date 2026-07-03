@@ -5,9 +5,9 @@ import Footer from "../components/Footer";
 
 const PublicLayout = ({ children }) => {
     return (
-        <div className="flex flex-col min-h-screen bg-gray-50 dark:bg-neutral-900 text-slate-900 dark:text-slate-50">
+        <div className="app-layout">
             <Header />
-            <main className="flex-1 w-full">
+            <main className="app-main-content">
                 {children || <Outlet />}
             </main>
             <Footer />
