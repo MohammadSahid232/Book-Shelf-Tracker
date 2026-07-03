@@ -3,46 +3,46 @@
 
 /* =========================================================
    BOOKSHELF APP — THEME DESIGN SYSTEM
-   Light: clean white + deep blue accents
-   Dark:  deep navy + bright blue accents
+   Light: warm off-white + olive-green + orange accents
+   Dark:  dark forest olive green + orange accents (BookShelf image)
    ========================================================= */
 
-/* --- Light Theme Defaults --- */
+/* --- Light Theme --- */
 :root {
-  --color-bg:         #f0f4ff;
-  --color-surface:    #ffffff;
-  --color-border:     #c7d4f0;
-  --color-text:       #1e2a4a;
-  --color-text-muted: #64748b;
-  --color-primary:    #1d4ed8;
-  --color-primary-hover: #1e40af;
-  --color-secondary:  #3b82f6;
-  --color-accent:     #60a5fa;
-  --color-badge-bg:   #dbeafe;
-  --color-badge-text: #1d4ed8;
-  --color-card-hover: #eff6ff;
-  --color-star:       #f59e0b;
-  --color-danger:     #ef4444;
-  --color-danger-hover: #fef2f2;
+  --color-bg:            #f5f0e8;
+  --color-surface:       #ffffff;
+  --color-border:        #d6c9a8;
+  --color-text:          #1a1f0f;
+  --color-text-muted:    #5a6a40;
+  --color-primary:       #c8601a;
+  --color-primary-hover: #a84e14;
+  --color-secondary:     #e8843a;
+  --color-accent:        #f0a060;
+  --color-badge-bg:      #fde9d4;
+  --color-badge-text:    #c8601a;
+  --color-card-hover:    #fdf3e7;
+  --color-star:          #e8a020;
+  --color-danger:        #c0392b;
+  --color-danger-hover:  #fdf0ee;
 }
 
-/* --- Dark (Blue) Theme --- */
+/* --- Dark Theme (BookShelf image palette) --- */
 .dark {
-  --color-bg:         #0b1120;
-  --color-surface:    #111827;
-  --color-border:     #1e3a5f;
-  --color-text:       #e2e8f0;
-  --color-text-muted: #94a3b8;
-  --color-primary:    #3b82f6;
-  --color-primary-hover: #2563eb;
-  --color-secondary:  #60a5fa;
-  --color-accent:     #93c5fd;
-  --color-badge-bg:   #1e3a5f;
-  --color-badge-text: #93c5fd;
-  --color-card-hover: #1a2744;
-  --color-star:       #fbbf24;
-  --color-danger:     #f87171;
-  --color-danger-hover: #1f1010;
+  --color-bg:            #1a2415;
+  --color-surface:       #243020;
+  --color-border:        #3a5030;
+  --color-text:          #f0ede5;
+  --color-text-muted:    #9aac80;
+  --color-primary:       #e8843a;
+  --color-primary-hover: #c8601a;
+  --color-secondary:     #f0a060;
+  --color-accent:        #f5b880;
+  --color-badge-bg:      #3a5030;
+  --color-badge-text:    #f0a060;
+  --color-card-hover:    #2e3e28;
+  --color-star:          #f5c040;
+  --color-danger:        #e05050;
+  --color-danger-hover:  #1f0f0f;
 }
 
 /* =========================================================
@@ -59,10 +59,10 @@ body {
    NAVBAR
    ========================================================= */
 .app-navbar {
-  background-color: var(--color-surface);
-  border-bottom: 1px solid var(--color-border);
-  box-shadow: 0 1px 8px rgba(30, 42, 74, 0.08);
-  padding: 0.75rem 1.5rem;
+  background-color: #0f1a0a;
+  border-bottom: 2px solid var(--color-border);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+  padding: 0.85rem 1.5rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -73,10 +73,10 @@ body {
 }
 
 .app-navbar-brand {
-  font-size: 1.25rem;
+  font-size: 1.35rem;
   font-weight: 800;
-  color: var(--color-primary);
-  letter-spacing: -0.02em;
+  color: #ffffff;
+  letter-spacing: -0.01em;
   text-decoration: none;
 }
 
@@ -459,7 +459,7 @@ body {
 /* Sidebar */
 .app-sidebar {
   width: 16rem;
-  background-color: var(--color-surface);
+  background-color: #0f1a0a;
   border-right: 1px solid var(--color-border);
   overflow-y: auto;
   padding: 1.5rem 1rem;
@@ -516,13 +516,13 @@ body {
    FOOTER
    ========================================================= */
 .app-footer {
-  background-color: var(--color-surface);
+  background-color: #0f1a0a;
   border-top: 1px solid var(--color-border);
-  color: var(--color-text-muted);
+  color: #9aac80;
   text-align: center;
   padding: 1rem;
   font-size: 0.8rem;
-  transition: background-color 0.3s ease, border-color 0.3s ease;
+  transition: border-color 0.3s ease;
 }
 
 /* =========================================================
