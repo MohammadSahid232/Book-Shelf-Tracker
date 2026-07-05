@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import BookCard from '../components/BookCard';
 import { useAuth } from '../context/AuthContext';
 
@@ -73,6 +73,7 @@ function Dashboard() {
       acc[status] = books.filter((b) => b.status === status).length;
       return acc;
     }, {});
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setCounts(newCounts);
   }, [books]);
 
@@ -107,7 +108,7 @@ function Dashboard() {
       {/* Page Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2rem' }}>
         <h1 className="dashboard-title">
-          📚 {user ? `${user.name}'s Bookshelf` : 'My Bookshelf'}
+           {user ? `${user.name}'s Bookshelf` : 'My Bookshelf'}
         </h1>
         <button onClick={() => setIsModalOpen(true)} className="add-book-btn">
           + Add Book

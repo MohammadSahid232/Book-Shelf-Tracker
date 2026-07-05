@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
@@ -20,7 +20,7 @@ export default function Login() {
   return (
     <main className="auth-page">
       <div className="auth-card">
-        <h1 className="auth-title">🔐 Sign In</h1>
+        <h1 className="auth-title"> Sign In</h1>
 
         <form className="auth-form" onSubmit={handleSubmit}>
           <div>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 
 export default function Register() {
@@ -22,7 +22,7 @@ export default function Register() {
   return (
     <main className="auth-page">
       <div className="auth-card">
-        <h1 className="auth-title">📝 Create Account</h1>
+        <h1 className="auth-title"> Create Account</h1>
 
         <form className="auth-form" onSubmit={handleSubmit}>
           <div>

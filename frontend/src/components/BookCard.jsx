@@ -1,4 +1,4 @@
-import React from 'react';
+
 
 const STATUS_ORDER = ['Want to Read', 'Reading', 'Finished'];
 
