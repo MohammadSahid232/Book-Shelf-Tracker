@@ -9,20 +9,19 @@ function Dashboard() {
 
   // Fetch data when component loads using useEffect
   useEffect(() => {
-    // We fetch some dummy data from OpenLibrary to demonstrate useEffect
-    fetch('https://openlibrary.org/subjects/fiction.json?limit=6')
+    fetch('http://localhost:5000/api/books')
       .then((response) => response.json())
       .then((data) => {
-        // Map the fetched data to our book format
-        const fetchedBooks = data.works.map((work, index) => {
+        const fetchedBooks = data.map((book) => {
+          // Normalize status casing to match the frontend column filters
           let status = 'Want to Read';
-          if (index > 1) status = 'Reading';
-          if (index > 3) status = 'Finished';
+          if (book.status.toLowerCase() === 'reading') status = 'Reading';
+          if (book.status.toLowerCase() === 'finished') status = 'Finished';
 
           return {
-            id: work.key,
-            title: work.title,
-            author: work.authors && work.authors.length > 0 ? work.authors[0].name : 'Unknown Author',
+            id: book.id,
+            title: book.title,
+            author: book.author,
             status: status
           };
         });
