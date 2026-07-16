@@ -7,16 +7,38 @@ export default function Register() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [message, setMessage] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (password !== confirmPassword) {
       setMessage("Passwords do not match!");
       return;
     }
-    setMessage(`Registration successful for ${email}!`);
-    setEmail('');
-    setPassword('');
-    setConfirmPassword('');
+    try {
+      const response = await fetch('http://localhost:5000/api/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          email,
+          password,
+          confirmPassword
+        })
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        const errorMsg = data.errors ? data.errors.map(err => err.msg).join(', ') : data.message;
+        setMessage(errorMsg || 'Registration failed');
+      } else {
+        setMessage('Registration successful!');
+        setEmail('');
+        setPassword('');
+        setConfirmPassword('');
+      }
+    } catch (err) {
+      console.error(err);
+      setMessage('Failed to connect to the backend server.');
+    }
   };
 
   return (

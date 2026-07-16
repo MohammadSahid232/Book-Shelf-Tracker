@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import BookCard from '../components/BookCard';
 import { useAuth } from '../context/AuthContext';
 
@@ -7,31 +8,29 @@ function Dashboard() {
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch data when component loads using useEffect
+  // Fetch books on mount using Axios
   useEffect(() => {
-    // We fetch some dummy data from OpenLibrary to demonstrate useEffect
-    fetch('https://openlibrary.org/subjects/fiction.json?limit=6')
-      .then((response) => response.json())
-      .then((data) => {
-        // Map the fetched data to our book format
-        const fetchedBooks = data.works.map((work, index) => {
+    axios.get('http://localhost:5000/api/books')
+      .then((response) => {
+        const fetchedBooks = response.data.map((book) => {
+          // Normalize status casing to match the frontend column filters
           let status = 'Want to Read';
-          if (index > 1) status = 'Reading';
-          if (index > 3) status = 'Finished';
+          if (book.status.toLowerCase() === 'reading') status = 'Reading';
+          if (book.status.toLowerCase() === 'finished') status = 'Finished';
 
           return {
-            id: work.key,
-            title: work.title,
-            author: work.authors && work.authors.length > 0 ? work.authors[0].name : 'Unknown Author',
+            id: book.id,
+            title: book.title,
+            author: book.author,
             status: status
           };
         });
-        
+
         setBooks(fetchedBooks);
         setLoading(false);
       })
       .catch((error) => {
-        console.error("Error fetching data:", error);
+        console.error('Error fetching books:', error);
         setLoading(false);
       });
   }, []); // Empty array = run only ONCE on mount
