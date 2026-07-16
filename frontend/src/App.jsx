@@ -4,6 +4,7 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
+import TaskList from './pages/TaskList';
 import AdminLayout from './layouts/AdminLayout';
 import PublicLayout from './layouts/PublicLayout';
 import { AuthProvider } from './context/AuthContext';
@@ -16,6 +17,7 @@ function App() {
           {/* Dashboard / Admin Routes */}
           <Route element={<AdminLayout />}>
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/tasks" element={<TaskList />} />
           </Route>
 
           {/* Public / Auth Routes */}

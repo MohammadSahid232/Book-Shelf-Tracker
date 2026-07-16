@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import BookCard from '../components/BookCard';
 import { useAuth } from '../context/AuthContext';
 
@@ -7,12 +8,11 @@ function Dashboard() {
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch data when component loads using useEffect
+  // Fetch books on mount using Axios
   useEffect(() => {
-    fetch('http://localhost:5000/api/books')
-      .then((response) => response.json())
-      .then((data) => {
-        const fetchedBooks = data.map((book) => {
+    axios.get('http://localhost:5000/api/books')
+      .then((response) => {
+        const fetchedBooks = response.data.map((book) => {
           // Normalize status casing to match the frontend column filters
           let status = 'Want to Read';
           if (book.status.toLowerCase() === 'reading') status = 'Reading';
@@ -25,12 +25,12 @@ function Dashboard() {
             status: status
           };
         });
-        
+
         setBooks(fetchedBooks);
         setLoading(false);
       })
       .catch((error) => {
-        console.error("Error fetching data:", error);
+        console.error('Error fetching books:', error);
         setLoading(false);
       });
   }, []); // Empty array = run only ONCE on mount
