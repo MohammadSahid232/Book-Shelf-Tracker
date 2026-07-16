@@ -52,7 +52,7 @@ function Dashboard() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {/* Want to Read Column */}
         <div className="flex flex-col">
-          <h2 className="text-xl font-semibold mb-4 text-center border-b-2 border-primary pb-2">Want to Read</h2>
+          <h2 className="text-xl font-semibold mb-4 text-center border-b-2 border-primary pb-2">Want to Read ({wantToReadBooks.length})</h2>
           <div className="flex-1">
             {wantToReadBooks.map(book => (
               <BookCard key={book.id} book={book} />
@@ -62,7 +62,7 @@ function Dashboard() {
 
         {/* Reading Column */}
         <div className="flex flex-col">
-          <h2 className="text-xl font-semibold mb-4 text-center border-b-2 border-secondary pb-2">Reading</h2>
+          <h2 className="text-xl font-semibold mb-4 text-center border-b-2 border-secondary pb-2">Reading ({readingBooks.length})</h2>
           <div className="flex-1">
             {readingBooks.map(book => (
               <BookCard key={book.id} book={book} />
@@ -72,7 +72,7 @@ function Dashboard() {
 
         {/* Finished Column */}
         <div className="flex flex-col">
-          <h2 className="text-xl font-semibold mb-4 text-center border-b-2 border-accent pb-2">Finished</h2>
+          <h2 className="text-xl font-semibold mb-4 text-center border-b-2 border-accent pb-2">Finished ({finishedBooks.length})</h2>
           <div className="flex-1">
             {finishedBooks.map(book => (
               <BookCard key={book.id} book={book} />
