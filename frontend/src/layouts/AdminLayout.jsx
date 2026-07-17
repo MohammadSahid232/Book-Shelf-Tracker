@@ -1,71 +1,21 @@
 import React, { useState } from 'react';
-import { Outlet, Link } from 'react-router-dom';
-import Header from "../components/Header";
+import { Outlet } from 'react-router-dom';
+import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import Sidebar from "../components/Sidebar";
 
-const AdminLayout = ({ children }) => {
+const AdminLayout = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     return (
         <div className="flex flex-col min-h-screen bg-gray-50 dark:bg-neutral-900 text-slate-900 dark:text-slate-50">
-            <Header />
+            <Navbar />
 
             <div className="flex flex-1 relative">
-                {/* Sidebar */}
-                <aside 
-                    className={`fixed inset-y-0 left-0 z-30 w-64 bg-white dark:bg-neutral-800 border-r border-slate-200 dark:border-neutral-700 transform lg:transform-none lg:opacity-100 lg:relative transition-all duration-300 ease-in-out ${
-                        isSidebarOpen ? 'translate-x-0 opacity-100' : '-translate-x-full lg:translate-x-0'
-                    }`}
-                    style={{ top: '78px', height: 'calc(100vh - 78px)' }}
-                >
-                    <div className="h-full px-4 py-6 overflow-y-auto">
-                        <ul className="space-y-2 text-sm font-medium text-slate-800 dark:text-slate-200">
-                            <li>
-                                <Link to="/dashboard" className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-neutral-700 transition-colors">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                                    </svg>
-                                    Dashboard
-                                </Link>
-                            </li>
-                            <li>
-                                <Link to="/" className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-neutral-700 transition-colors">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                                    </svg>
-                                    Manage Books
-                                </Link>
-                            </li>
-                            <li>
-                                <Link to="/tasks" className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-neutral-700 transition-colors">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                                    </svg>
-                                    Tasks
-                                </Link>
-                            </li>
-                            <li>
-                                <Link to="/" className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-neutral-700 transition-colors">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a3 3 0 11-6 0 3 3 0 016 0z" />
-                                    </svg>
-                                    Users
-                                </Link>
-                            </li>
-                            <li>
-                                <Link to="/" className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-neutral-700 transition-colors">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                    </svg>
-                                    Settings
-                                </Link>
-                            </li>
-                        </ul>
-                    </div>
-                </aside>
+                {/* Reusable Sidebar */}
+                <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
 
-                {/* Sidebar toggle button for mobile */}
+                {/* Mobile sidebar toggle button */}
                 <button 
                     onClick={() => setIsSidebarOpen(!isSidebarOpen)}
                     className="lg:hidden fixed bottom-6 right-6 z-40 bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg transition-colors focus:outline-none"
@@ -77,8 +27,8 @@ const AdminLayout = ({ children }) => {
                 </button>
 
                 {/* Main Content Area */}
-                <main className="flex-1 min-h-[calc(100vh-78px)] p-6 overflow-y-auto">
-                    {children || <Outlet />}
+                <main className="flex-1 min-h-[calc(100vh-65px)] p-6 overflow-y-auto">
+                    <Outlet />
                 </main>
             </div>
 

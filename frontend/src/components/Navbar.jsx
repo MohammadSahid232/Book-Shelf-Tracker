@@ -1,95 +1,140 @@
 import React from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { FaBookOpen, FaUser, FaSignOutAlt, FaColumns, FaTasks, FaBookReader } from 'react-icons/fa';
+import { useAuth } from '../context/AuthContext';
 
-function Navbar({ searchVal, setSearchVal }) {
+export default function Navbar() {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/');
+  };
+
   return (
-    <div className="navbar bg-base-100/80 backdrop-blur-md sticky top-0 z-50 border-b border-base-200 px-4 md:px-8 transition-all duration-300">
-      <div className="flex-1 gap-2">
-        {/* Mobile menu dropdown */}
-        <div className="dropdown lg:hidden">
-          <div tabIndex={0} role="button" className="btn btn-ghost btn-circle" aria-label="Open menu">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h7" />
-            </svg>
+    <div className="navbar bg-white dark:bg-neutral-800 border-b border-slate-200 dark:border-neutral-700/80 px-4 md:px-8 shadow-xs sticky top-0 z-50 transition-all duration-300">
+      {/* Brand logo & name */}
+      <div className="flex-1">
+        <Link
+          to={user?.role === 'admin' ? '/admin/dashboard' : user ? '/books' : '/'}
+          className="flex items-center gap-2.5 text-xl font-extrabold tracking-tight bg-gradient-to-r from-blue-600 to-indigo-500 bg-clip-text text-transparent hover:scale-102 transition-transform"
+        >
+          <div className="bg-blue-600 text-white p-2 rounded-xl shadow-md shadow-blue-500/20">
+            <FaBookOpen className="w-5 h-5" />
           </div>
-          <ul tabIndex={0} className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow-lg bg-base-100 rounded-box w-52 border border-base-200">
-            <li><a href="#" className="font-medium">Home</a></li>
-            <li><a href="#shelves" className="font-medium">Shelves</a></li>
-            <li><a href="#add-book" className="font-medium">Add Book</a></li>
-          </ul>
-        </div>
-
-        {/* Logo and Brand */}
-        <a href="#" className="btn btn-ghost hover:bg-transparent gap-2 px-0 md:px-2">
-          <div className="bg-primary text-primary-content p-2 rounded-xl shadow-md shadow-primary/20">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
-            </svg>
-          </div>
-          <span className="text-xl font-extrabold tracking-tight bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-            BookShelf
-          </span>
-        </a>
-
-        {/* Desktop menu links */}
-        <div className="hidden lg:flex ml-6">
-          <ul className="menu menu-horizontal px-1 gap-2">
-            <li>
-              <a href="#" className="font-semibold text-sm hover:text-primary transition-colors duration-200">Home</a>
-            </li>
-            <li>
-              <a href="#shelves" className="font-semibold text-sm hover:text-primary transition-colors duration-200">Shelves</a>
-            </li>
-            <li>
-              <a href="#add-book" className="font-semibold text-sm hover:text-primary transition-colors duration-200">Add Book</a>
-            </li>
-          </ul>
-        </div>
+          <span className="hidden sm:inline">BookShelf</span>
+        </Link>
       </div>
 
-      <div className="flex-none gap-4">
-        {/* Search Bar - styled from DaisyUI & ReadyMadeUI patterns */}
-        <div className="form-control relative max-w-xs">
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-base-200/60 border border-base-300 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all duration-200">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-            <input
-              type="text"
-              placeholder="Search books..."
-              value={searchVal}
-              onChange={(e) => setSearchVal(e.target.value)}
-              className="w-28 md:w-48 bg-transparent text-sm focus:outline-none placeholder:text-base-content/40"
-            />
-            {searchVal && (
-              <button 
-                onClick={() => setSearchVal('')}
-                className="btn btn-ghost btn-xs btn-circle"
-                aria-label="Clear search"
-              >
-                ✕
-              </button>
+      {/* Center navigation links (only for desktop) */}
+      {user && (
+        <div className="hidden md:flex ml-6 flex-none">
+          <ul className="menu menu-horizontal px-1 gap-1">
+            {user.role === 'admin' ? (
+              <>
+                <li>
+                  <Link
+                    to="/admin/dashboard"
+                    className="flex items-center gap-2 px-3 py-2 text-sm font-semibold text-slate-600 hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-400 rounded-lg transition-colors"
+                  >
+                    <FaColumns className="w-4 h-4" />
+                    Dashboard
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/admin/tasks"
+                    className="flex items-center gap-2 px-3 py-2 text-sm font-semibold text-slate-600 hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-400 rounded-lg transition-colors"
+                  >
+                    <FaTasks className="w-4 h-4" />
+                    Tasks
+                  </Link>
+                </li>
+              </>
+            ) : (
+              <li>
+                <Link
+                  to="/books"
+                  className="flex items-center gap-2 px-3 py-2 text-sm font-semibold text-slate-600 hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-400 rounded-lg transition-colors"
+                >
+                  <FaBookReader className="w-4 h-4" />
+                  My Shelf
+                </Link>
+              </li>
             )}
-          </div>
-        </div>
-
-        {/* Profile Avatar / Dropdown */}
-        <div className="dropdown dropdown-end">
-          <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar online ring-2 ring-primary/20 hover:ring-primary/40 transition-all duration-200">
-            <div className="w-10 rounded-full">
-              <img alt="User profile avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80" />
-            </div>
-          </div>
-          <ul tabIndex={0} className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow-2xl bg-base-100 rounded-2xl w-52 border border-base-200">
-            <li className="menu-title px-4 py-2 text-xs font-semibold text-base-content/40">My Account</li>
-            <li><a className="justify-between">Profile <span className="badge badge-primary badge-sm">New</span></a></li>
-            <li><a>Settings</a></li>
-            <hr className="my-1 border-base-200" />
-            <li><a className="text-error hover:bg-error/10">Logout</a></li>
           </ul>
         </div>
+      )}
+
+      {/* Right-side user controls */}
+      <div className="flex-none gap-3 items-center">
+        {user ? (
+          <>
+            {/* User Role Badge */}
+            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold border ${
+              user.role === 'admin'
+                ? 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/20 dark:text-purple-300 dark:border-purple-800'
+                : 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-800'
+            }`}>
+              {user.role === 'admin' ? '👑 Admin' : '📖 Reader'}
+            </span>
+
+            {/* Profile Dropdown */}
+            <div className="dropdown dropdown-end">
+              <div
+                tabIndex={0}
+                role="button"
+                className="btn btn-ghost btn-circle avatar online ring-2 ring-blue-500/10 hover:ring-blue-500/30 transition-all"
+              >
+                <div className="w-9 h-9 rounded-full bg-blue-100 dark:bg-neutral-700 flex items-center justify-center font-bold text-blue-700 dark:text-blue-300 capitalize text-sm">
+                  {user.name?.[0]}
+                </div>
+              </div>
+              <ul
+                tabIndex={0}
+                className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow-xl bg-white dark:bg-neutral-800 rounded-2xl w-52 border border-slate-200 dark:border-neutral-700 space-y-1"
+              >
+                <li className="menu-title px-4 py-2 text-xs font-bold text-slate-400 dark:text-slate-500 border-b border-slate-100 dark:border-neutral-700/50 mb-1">
+                  Logged in as {user.name}
+                </li>
+                <li>
+                  <Link to={user.role === 'admin' ? "/admin/dashboard" : "/books"} className="font-semibold text-slate-700 dark:text-slate-300 rounded-xl py-2 hover:bg-slate-50 dark:hover:bg-neutral-700/50">
+                    My Profile
+                  </Link>
+                </li>
+                <hr className="border-slate-100 dark:border-neutral-700/50 my-1" />
+                <li>
+                  <button
+                    onClick={handleLogout}
+                    className="font-bold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-xl py-2 flex items-center gap-2"
+                  >
+                    <FaSignOutAlt className="w-4 h-4" />
+                    Sign Out
+                  </button>
+                </li>
+              </ul>
+            </div>
+          </>
+        ) : (
+          <div className="flex gap-2">
+            <Link
+              to="/login"
+              id="navbar-login-btn"
+              className="px-4 py-2 text-sm font-bold text-slate-700 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-300 dark:hover:text-white dark:hover:bg-neutral-700 rounded-xl transition-all"
+            >
+              Sign In
+            </Link>
+            <Link
+              to="/register"
+              id="navbar-register-btn"
+              className="px-4 py-2 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-all shadow-sm shadow-blue-500/20 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              Register
+            </Link>
+          </div>
+        )}
       </div>
     </div>
   );
 }
-
-export default Navbar;
