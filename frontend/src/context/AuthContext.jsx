@@ -1,74 +1,103 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
+import axios from 'axios';
 
 const AuthContext = createContext();
 
 const BACKEND_URL = 'http://localhost:5000';
 
 export const AuthProvider = ({ children }) => {
+  const [token, setToken] = useState(() => {
+    try {
+      return localStorage.getItem('token') || null;
+    } catch {
+      return null;
+    }
+  });
+
   const [user, setUser] = useState(() => {
     try {
-      const stored = localStorage.getItem('bst_user');
+      const stored = localStorage.getItem('user') || localStorage.getItem('bst_user');
       return stored ? JSON.parse(stored) : null;
     } catch {
       return null;
     }
   });
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Persist user to localStorage whenever it changes
+  // Synchronize token & user state with localStorage & handle Google OAuth URL parameters
   useEffect(() => {
+    // Check for Google OAuth callback parameters in URL
+    const params = new URLSearchParams(window.location.search);
+    const urlToken = params.get('token');
+    const urlUserStr = params.get('user');
+
+    if (urlToken && urlUserStr) {
+      try {
+        const parsedUser = JSON.parse(decodeURIComponent(urlUserStr));
+        localStorage.setItem('token', urlToken);
+        localStorage.setItem('user', JSON.stringify(parsedUser));
+        setToken(urlToken);
+        setUser(parsedUser);
+        window.history.replaceState({}, document.title, window.location.pathname);
+      } catch (err) {
+        console.error('Error handling Google Auth parameters:', err);
+      }
+    }
+  }, []);
+
+  // Update localStorage when token or user state changes
+  useEffect(() => {
+    if (token) {
+      localStorage.setItem('token', token);
+    } else {
+      localStorage.removeItem('token');
+    }
+
     if (user) {
+      localStorage.setItem('user', JSON.stringify(user));
       localStorage.setItem('bst_user', JSON.stringify(user));
     } else {
+      localStorage.removeItem('user');
       localStorage.removeItem('bst_user');
     }
-  }, [user]);
+  }, [token, user]);
 
-  // Login — client-side simulation with single active admin check
-  const login = async (email, password) => {
+  // Login User via Backend API
+  const login = async (credentials) => {
     setLoading(true);
     setError('');
-    
-    // Simulate slight loading delay for professional feel
-    await new Promise((resolve) => setTimeout(resolve, 500));
+
+    // Accept either object { email, password } or raw arguments
+    const payload = typeof credentials === 'object' ? credentials : { email: arguments[0], password: arguments[1] };
 
     try {
-      const normalizedEmail = email.toLowerCase().trim();
+      const response = await axios.post(`${BACKEND_URL}/auth/login`, payload);
+      const { token: newToken, user: userData } = response.data;
 
-      // --- Admin login ---
-      if (normalizedEmail === 'admin@bookshelf.com') {
-        if (password !== 'admin123') {
-          const msg = 'Invalid admin credentials';
-          setError(msg);
-          return { success: false, message: msg };
-        }
-        
-        // Single admin session validation via localStorage
-        const adminActive = localStorage.getItem('bst_admin_active');
-        if (adminActive === 'true') {
-          const msg = 'Admin is already logged in from another session. Only one active session is allowed.';
-          setError(msg);
-          return { success: false, message: msg };
-        }
-
-        localStorage.setItem('bst_admin_active', 'true');
-        const adminUser = { name: 'Admin', email: 'admin@bookshelf.com', role: 'admin' };
-        setUser(adminUser);
-        return { success: true, role: 'admin' };
+      if (newToken) {
+        setToken(newToken);
+        localStorage.setItem('token', newToken);
+      }
+      if (userData) {
+        // Map user object fields for compatibility (first_name / name, role)
+        const formattedUser = {
+          id: userData.id || userData._id,
+          name: userData.first_name ? `${userData.first_name} ${userData.last_name || ''}`.trim() : (userData.name || payload.email.split('@')[0]),
+          first_name: userData.first_name,
+          last_name: userData.last_name,
+          email: userData.email,
+          role: userData.role === 'admin' ? 'admin' : (payload.email === 'admin@bookshelf.com' ? 'admin' : 'user')
+        };
+        setUser(formattedUser);
+        localStorage.setItem('user', JSON.stringify(formattedUser));
+        return { success: true, user: formattedUser, token: newToken };
       }
 
-      // --- Customer login ---
-      const customerUser = {
-        name: normalizedEmail.split('@')[0],
-        email: normalizedEmail,
-        role: 'customer'
-      };
-      setUser(customerUser);
-      return { success: true, role: 'customer' };
-
+      return { success: true };
     } catch (err) {
-      const msg = 'Login failed. Please try again.';
+      const msg = err.response?.data?.message || 'Invalid credentials. Please try again.';
       setError(msg);
       return { success: false, message: msg };
     } finally {
@@ -76,32 +105,38 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Register — calls the backend simulated registration API to validate input
-  const register = async (name, email, password, confirmPassword) => {
+  // Register User via Backend API
+  const register = async (registerData) => {
     setLoading(true);
     setError('');
+
+    // Normalize form fields for AuthController backend
+    let payload;
+    if (typeof registerData === 'object') {
+      payload = {
+        first_name: registerData.first_name || registerData.firstName || registerData.name?.split(' ')[0] || 'User',
+        last_name: registerData.last_name || registerData.lastName || registerData.name?.split(' ').slice(1).join(' ') || '',
+        email: registerData.email,
+        password: registerData.password,
+        confirm_password: registerData.confirm_password || registerData.confirmPassword || registerData.password,
+        accept_terms: registerData.accept_terms !== undefined ? registerData.accept_terms : true
+      };
+    } else {
+      payload = {
+        first_name: arguments[0],
+        last_name: '',
+        email: arguments[1],
+        password: arguments[2],
+        confirm_password: arguments[3] || arguments[2],
+        accept_terms: true
+      };
+    }
+
     try {
-      const res = await fetch(`${BACKEND_URL}/api/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: email.toLowerCase().trim(),
-          password,
-          confirmPassword,
-          firstName: name,
-          lastName: ''
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        // Extract validation errors from express-validator response
-        const errorMsg = data.errors ? data.errors.map(err => err.msg).join(', ') : (data.message || 'Registration failed');
-        setError(errorMsg);
-        return { success: false, message: errorMsg };
-      }
-      return { success: true };
+      const response = await axios.post(`${BACKEND_URL}/auth/register`, payload);
+      return { success: true, data: response.data };
     } catch (err) {
-      const msg = 'Cannot connect to server. Is the backend running?';
+      const msg = err.response?.data?.message || 'Error registering user';
       setError(msg);
       return { success: false, message: msg };
     } finally {
@@ -111,14 +146,21 @@ export const AuthProvider = ({ children }) => {
 
   // Logout
   const logout = async () => {
-    if (user?.role === 'admin') {
-      localStorage.removeItem('bst_admin_active');
-    }
+    setToken(null);
     setUser(null);
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('bst_user');
+  };
+
+  // Helper for Authorization Headers
+  const getAuthHeaders = () => {
+    const activeToken = token || localStorage.getItem('token');
+    return activeToken ? { Authorization: `Bearer ${activeToken}` } : {};
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, error, setError, login, register, logout }}>
+    <AuthContext.Provider value={{ token, user, loading, error, setError, login, register, logout, getAuthHeaders }}>
       {children}
     </AuthContext.Provider>
   );
