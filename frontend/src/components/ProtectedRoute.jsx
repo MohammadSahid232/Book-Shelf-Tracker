@@ -15,15 +15,16 @@ const ProtectedRoute = ({ children, requiredRole }) => {
     } catch (_) {}
   }
 
+  // Not logged in at all
   if (!activeToken && !activeUser) {
     return <Navigate to="/login" replace />;
   }
 
-  if (requiredRole && activeUser && activeUser.role !== requiredRole) {
-    if (activeUser.role === 'admin') {
-      return <Navigate to="/admin/dashboard" replace />;
+  if (requiredRole) {
+    // Admin role check
+    if (requiredRole === 'admin' && activeUser?.role !== 'admin') {
+      return <Navigate to="/books" replace />;
     }
-    return <Navigate to="/books" replace />;
   }
 
   return children ?? <Outlet />;

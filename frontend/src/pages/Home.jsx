@@ -7,24 +7,12 @@ function Home() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Parse token and user parameters from URL if redirected from Google OAuth
+    // If redirected from Google OAuth, delegate to OAuthCallback page
     const params = new URLSearchParams(window.location.search);
     const token = params.get('token');
     const userStr = params.get('user');
     if (token && userStr) {
-      try {
-        localStorage.setItem('token', token);
-        localStorage.setItem('user', userStr);
-        window.history.replaceState({}, document.title, window.location.pathname);
-        const parsedUser = JSON.parse(decodeURIComponent(userStr));
-        if (parsedUser.role === 'admin') {
-          navigate('/admin/dashboard');
-        } else {
-          navigate('/books');
-        }
-      } catch (error) {
-        console.error('Error handling Google Auth parameters:', error);
-      }
+      navigate(`/oauth/callback${window.location.search}`, { replace: true });
     }
   }, [navigate]);
 

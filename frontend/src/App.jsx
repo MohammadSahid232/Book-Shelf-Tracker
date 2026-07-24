@@ -6,6 +6,7 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import BooksPage from './pages/BooksPage';
 import TaskList from './pages/TaskList';
+import OAuthCallback from './pages/OAuthCallback';
 import AdminLayout from './layouts/AdminLayout';
 import PublicLayout from './layouts/PublicLayout';
 import { AuthProvider } from './context/AuthContext';
@@ -16,6 +17,9 @@ function App() {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
+          {/* ===== OAuth Callback (Google redirects here with ?token=&user=) ===== */}
+          <Route path="/oauth/callback" element={<OAuthCallback />} />
+
           {/* ===== Admin routes ===== */}
           <Route element={<ProtectedRoute requiredRole="admin" />}>
             <Route element={<AdminLayout />}>
@@ -24,8 +28,8 @@ function App() {
             </Route>
           </Route>
 
-          {/* ===== Customer routes ===== */}
-          <Route element={<ProtectedRoute requiredRole="customer" />}>
+          {/* ===== User/Customer book routes (role: user or customer) ===== */}
+          <Route element={<ProtectedRoute />}>
             <Route element={<PublicLayout />}>
               <Route path="/books" element={<BooksPage />} />
             </Route>
