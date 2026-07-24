@@ -6,14 +6,8 @@ import Column from '../components/Column';
 
 const API = 'http://localhost:5000/api/books';
 
-const statusColors = {
-  'want to read': 'bg-blue-100 text-blue-700 border-blue-200',
-  'reading': 'bg-yellow-100 text-yellow-700 border-yellow-200',
-  'finished': 'bg-green-100 text-green-700 border-green-200',
-};
-
 export default function BooksPage() {
-  const { user } = useAuth();
+  const { user, getAuthHeaders } = useAuth();
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -24,7 +18,7 @@ export default function BooksPage() {
     const fetchBooks = async () => {
       setLoading(true);
       try {
-        const response = await axios.get(API);
+        const response = await axios.get(API, { headers: getAuthHeaders() });
         setBooks(response.data);
       } catch (err) {
         setError('Failed to load books. Is the backend running?');
@@ -58,7 +52,7 @@ export default function BooksPage() {
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-50">📚 My Book Shelf</h1>
         <p className="text-slate-500 dark:text-slate-400 mt-1">
-          Welcome, {user?.name}! Browse the community book shelf.
+          Welcome, {user?.name || user?.first_name || 'User'}! Browse your reading list.
         </p>
       </div>
 

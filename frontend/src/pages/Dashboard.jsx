@@ -8,16 +8,10 @@ const API = 'http://localhost:5000/api/books';
 
 const statusOptions = ['want to read', 'reading', 'finished'];
 
-const statusColors = {
-  'want to read': 'bg-blue-100 text-blue-700 border-blue-200',
-  'reading': 'bg-yellow-100 text-yellow-700 border-yellow-200',
-  'finished': 'bg-green-100 text-green-700 border-green-200',
-};
-
 const emptyForm = { title: '', author: '', genre: '', status: 'want to read', rating: '', review: '' };
 
 export default function Dashboard() {
-  const { user } = useAuth();
+  const { user, getAuthHeaders } = useAuth();
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -29,10 +23,10 @@ export default function Dashboard() {
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState('');
 
-  const adminHeaders = {
+  const getHeaders = () => ({
     'Content-Type': 'application/json',
-    'x-user-role': 'admin',
-  };
+    ...getAuthHeaders()
+  });
 
   useEffect(() => {
     fetchBooks();
@@ -41,7 +35,7 @@ export default function Dashboard() {
   const fetchBooks = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(API);
+      const response = await axios.get(API, { headers: getHeaders() });
       setBooks(response.data);
     } catch (err) {
       setError('Failed to load books. Is the backend running?');
@@ -94,9 +88,9 @@ export default function Dashboard() {
 
     try {
       if (editingBook) {
-        await axios.patch(`${API}/${editingBook.id}`, payload, { headers: adminHeaders });
+        await axios.patch(`${API}/${editingBook.id}`, payload, { headers: getHeaders() });
       } else {
-        await axios.post(API, payload, { headers: adminHeaders });
+        await axios.post(API, payload, { headers: getHeaders() });
       }
       await fetchBooks();
       closeModal();
@@ -112,7 +106,7 @@ export default function Dashboard() {
     if (!window.confirm('Are you sure you want to delete this book?')) return;
     try {
       await axios.delete(`${API}/${bookId}`, {
-        headers: { 'x-user-role': 'admin' },
+        headers: getHeaders(),
       });
       setBooks((prev) => prev.filter((b) => b.id !== bookId));
     } catch (err) {
@@ -135,10 +129,10 @@ export default function Dashboard() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-50">
-            📚 Admin Dashboard
+            📚 Dashboard
           </h1>
           <p className="text-slate-500 dark:text-slate-400 mt-1">
-            Welcome, {user?.name}. Manage all books below.
+            Welcome, {user?.name || user?.first_name || 'User'}. Manage your bookshelf below.
           </p>
         </div>
         <button
@@ -208,107 +202,119 @@ export default function Dashboard() {
               </h3>
               <button
                 onClick={closeModal}
-                className="p-1 rounded-md text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-neutral-700 transition-colors"
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                ✕
               </button>
             </div>
 
             <form onSubmit={handleFormSubmit} className="p-6 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                  Title <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Book title"
-                  value={form.title}
-                  onChange={(e) => setForm({ ...form, title: e.target.value })}
-                  className="w-full px-3 py-2 text-sm rounded-lg bg-gray-50 dark:bg-neutral-700 border border-slate-300 dark:border-neutral-600 text-slate-900 dark:text-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Author</label>
-                <input
-                  type="text"
-                  placeholder="Author name"
-                  value={form.author}
-                  onChange={(e) => setForm({ ...form, author: e.target.value })}
-                  className="w-full px-3 py-2 text-sm rounded-lg bg-gray-50 dark:bg-neutral-700 border border-slate-300 dark:border-neutral-600 text-slate-900 dark:text-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Genre</label>
-                <input
-                  type="text"
-                  placeholder="e.g. Fiction, Mystery"
-                  value={form.genre}
-                  onChange={(e) => setForm({ ...form, genre: e.target.value })}
-                  className="w-full px-3 py-2 text-sm rounded-lg bg-gray-50 dark:bg-neutral-700 border border-slate-300 dark:border-neutral-600 text-slate-900 dark:text-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Status</label>
-                <select
-                  value={form.status}
-                  onChange={(e) => setForm({ ...form, status: e.target.value })}
-                  className="w-full px-3 py-2 text-sm rounded-lg bg-gray-50 dark:bg-neutral-700 border border-slate-300 dark:border-neutral-600 text-slate-900 dark:text-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  {statusOptions.map((s) => (
-                    <option key={s} value={s} className="capitalize">{s}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Rating (1–5)</label>
-                <select
-                  value={form.rating}
-                  onChange={(e) => setForm({ ...form, rating: e.target.value })}
-                  className="w-full px-3 py-2 text-sm rounded-lg bg-gray-50 dark:bg-neutral-700 border border-slate-300 dark:border-neutral-600 text-slate-900 dark:text-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">No rating</option>
-                  {[1,2,3,4,5].map((n) => (
-                    <option key={n} value={n}>{n} star{n > 1 ? 's' : ''}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Review / Notes</label>
-                <textarea
-                  rows={3}
-                  placeholder="Optional review or notes..."
-                  value={form.review}
-                  onChange={(e) => setForm({ ...form, review: e.target.value })}
-                  className="w-full px-3 py-2 text-sm rounded-lg bg-gray-50 dark:bg-neutral-700 border border-slate-300 dark:border-neutral-600 text-slate-900 dark:text-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-                />
-              </div>
-
               {formError && (
-                <div className="p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm dark:bg-red-900/30 dark:border-red-800 dark:text-red-300">
+                <div className="p-3 bg-red-50 text-red-700 rounded-lg text-sm border border-red-200">
                   {formError}
                 </div>
               )}
 
-              <div className="flex gap-3 pt-2">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                  Title *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={form.title}
+                  onChange={(e) => setForm({ ...form, title: e.target.value })}
+                  placeholder="e.g. The Alchemist"
+                  className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-neutral-600 bg-white dark:bg-neutral-700 text-slate-900 dark:text-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                  Author
+                </label>
+                <input
+                  type="text"
+                  value={form.author}
+                  onChange={(e) => setForm({ ...form, author: e.target.value })}
+                  placeholder="e.g. Paulo Coelho"
+                  className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-neutral-600 bg-white dark:bg-neutral-700 text-slate-900 dark:text-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                  Genre
+                </label>
+                <input
+                  type="text"
+                  value={form.genre}
+                  onChange={(e) => setForm({ ...form, genre: e.target.value })}
+                  placeholder="e.g. Fiction, Classic"
+                  className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-neutral-600 bg-white dark:bg-neutral-700 text-slate-900 dark:text-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                  Status
+                </label>
+                <select
+                  value={form.status}
+                  onChange={(e) => setForm({ ...form, status: e.target.value })}
+                  className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-neutral-600 bg-white dark:bg-neutral-700 text-slate-900 dark:text-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                >
+                  {statusOptions.map((s) => (
+                    <option key={s} value={s}>
+                      {s.charAt(0).toUpperCase() + s.slice(1)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                  Rating (1-5)
+                </label>
+                <select
+                  value={form.rating}
+                  onChange={(e) => setForm({ ...form, rating: e.target.value })}
+                  className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-neutral-600 bg-white dark:bg-neutral-700 text-slate-900 dark:text-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                >
+                  <option value="">No rating</option>
+                  {[1, 2, 3, 4, 5].map((num) => (
+                    <option key={num} value={num}>
+                      {num} {num === 1 ? 'Star' : 'Stars'}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                  Review / Notes
+                </label>
+                <textarea
+                  rows={3}
+                  value={form.review}
+                  onChange={(e) => setForm({ ...form, review: e.target.value })}
+                  placeholder="What did you think of this book?"
+                  className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-neutral-600 bg-white dark:bg-neutral-700 text-slate-900 dark:text-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none resize-none"
+                />
+              </div>
+
+              <div className="flex justify-end gap-3 pt-4 border-t border-slate-200 dark:border-neutral-700">
                 <button
                   type="button"
                   onClick={closeModal}
-                  className="flex-1 py-2 px-4 text-sm font-semibold rounded-lg border border-slate-300 dark:border-neutral-600 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-neutral-700 transition-colors"
+                  className="px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-neutral-700 rounded-lg"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="flex-1 py-2 px-4 text-sm font-semibold rounded-lg text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-60 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg disabled:opacity-60"
                 >
                   {submitting ? 'Saving...' : editingBook ? 'Save Changes' : 'Add Book'}
                 </button>
