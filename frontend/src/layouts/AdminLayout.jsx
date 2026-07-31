@@ -32,7 +32,6 @@ const AdminLayout = () => {
                 </main>
             </div>
 
-            {/* Footer */}
             <Footer />
         </div>
     );
