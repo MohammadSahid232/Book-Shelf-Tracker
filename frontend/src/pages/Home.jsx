@@ -2,6 +2,8 @@ import React, { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
+const BACKEND_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 function Home() {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -79,7 +81,7 @@ function Home() {
                 Create Account
               </Link>
               <a
-                href="http://localhost:5000/auth/google"
+                href={`${BACKEND_URL}/auth/google`}
                 className="px-8 py-3.5 bg-white text-slate-800 hover:bg-slate-100 font-semibold rounded-xl transition-all hover:scale-105 flex items-center justify-center gap-2 shadow-lg"
               >
                 <svg className="w-5 h-5" viewBox="0 0 24 24">

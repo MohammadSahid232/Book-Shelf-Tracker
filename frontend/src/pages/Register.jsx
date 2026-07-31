@@ -20,7 +20,13 @@ export default function Register() {
       return;
     }
 
-    const result = await register(name, email, password, confirmPassword);
+    // Pass as an object — arrow functions don't have 'arguments', so positional args won't work
+    const result = await register({
+      name,
+      email,
+      password,
+      confirmPassword,
+    });
 
     if (!result.success) {
       setMessage({ text: result.message || 'Registration failed', type: 'error' });

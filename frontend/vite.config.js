@@ -5,6 +5,7 @@ import babel from '@rolldown/plugin-babel'
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: '/',
   plugins: [
     react(),
     tailwindcss(),
@@ -12,4 +13,8 @@ export default defineConfig({
       presets: [reactCompilerPreset()]
     })
   ],
+  build: {
+    outDir: 'dist',
+    sourcemap: false,
+  }
 })

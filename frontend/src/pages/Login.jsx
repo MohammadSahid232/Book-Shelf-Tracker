@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
+const BACKEND_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -102,7 +104,7 @@ export default function Login() {
             </div>
 
             <a
-              href="http://localhost:5000/auth/google"
+              href={`${BACKEND_URL}/auth/google`}
               className="w-full py-2.5 px-4 text-sm rounded-lg font-semibold flex items-center justify-center gap-2 border border-slate-300 dark:border-neutral-600 bg-white dark:bg-neutral-700 text-slate-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-neutral-600 transition-colors"
             >
               <svg className="w-4 h-4" viewBox="0 0 24 24">

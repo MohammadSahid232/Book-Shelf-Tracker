@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import BookCard from '../components/BookCard';
 import Column from '../components/Column';
 
-const API = 'http://localhost:5000/api/books';
+const API = `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/books`;
 
 export default function BooksPage() {
   const { user, getAuthHeaders } = useAuth();
@@ -114,7 +114,7 @@ export default function BooksPage() {
             >
               {bks.map((book) => (
                 <BookCard
-                  key={book.id}
+                  key={book.id || book._id}
                   book={book}
                 />
               ))}

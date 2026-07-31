@@ -3,7 +3,8 @@ import axios from 'axios';
 
 const AuthContext = createContext();
 
-const BACKEND_URL = 'http://localhost:5000';
+// Use environment variable for API base URL — set VITE_API_URL in .env / Netlify env vars
+const BACKEND_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(() => {
@@ -69,8 +70,7 @@ export const AuthProvider = ({ children }) => {
     setLoading(true);
     setError('');
 
-    // Accept either object { email, password } or raw arguments
-    const payload = typeof credentials === 'object' ? credentials : { email: arguments[0], password: arguments[1] };
+    const payload = typeof credentials === 'object' ? credentials : { email: credentials, password: '' };
 
     try {
       const response = await axios.post(`${BACKEND_URL}/auth/login`, payload);
@@ -84,7 +84,9 @@ export const AuthProvider = ({ children }) => {
         // Map user object fields for compatibility (first_name / name, role)
         const formattedUser = {
           id: userData.id || userData._id,
-          name: userData.first_name ? `${userData.first_name} ${userData.last_name || ''}`.trim() : (userData.name || payload.email.split('@')[0]),
+          name: userData.first_name
+            ? `${userData.first_name} ${userData.last_name || ''}`.trim()
+            : (userData.name || payload.email.split('@')[0]),
           first_name: userData.first_name,
           last_name: userData.last_name,
           email: userData.email,
@@ -111,8 +113,9 @@ export const AuthProvider = ({ children }) => {
     setError('');
 
     // Normalize form fields for AuthController backend
+    // Always use object form — arrow functions don't have 'arguments'
     let payload;
-    if (typeof registerData === 'object') {
+    if (typeof registerData === 'object' && registerData !== null) {
       payload = {
         first_name: registerData.first_name || registerData.firstName || registerData.name?.split(' ')[0] || 'User',
         last_name: registerData.last_name || registerData.lastName || registerData.name?.split(' ').slice(1).join(' ') || '',
@@ -122,14 +125,10 @@ export const AuthProvider = ({ children }) => {
         accept_terms: registerData.accept_terms !== undefined ? registerData.accept_terms : true
       };
     } else {
-      payload = {
-        first_name: arguments[0],
-        last_name: '',
-        email: arguments[1],
-        password: arguments[2],
-        confirm_password: arguments[3] || arguments[2],
-        accept_terms: true
-      };
+      // Fallback: registerData is the name (string), not supported — return error
+      console.error('register() requires an object argument');
+      setLoading(false);
+      return { success: false, message: 'Registration error. Please try again.' };
     }
 
     try {
@@ -160,7 +159,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ token, user, loading, error, setError, login, register, logout, getAuthHeaders }}>
+    <AuthContext.Provider value={{ token, user, loading, error, setError, login, register, logout, getAuthHeaders, BACKEND_URL }}>
       {children}
     </AuthContext.Provider>
   );
