@@ -1,142 +1,121 @@
-# 📚 BookShelf Tracker
+# 📚 BookShelf AI — Modern MERN SaaS Library & Reading Companion
 
 [![CI Pipeline](https://github.com/MohammadSahid232/Book-Shelf-Tracker/actions/workflows/ci.yml/badge.svg)](https://github.com/MohammadSahid232/Book-Shelf-Tracker/actions/workflows/ci.yml)
+[![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)](https://github.com/MohammadSahid232/Book-Shelf-Tracker)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-A full-stack Web Application for organizing your reading library, tracking reading progress, managing personal tasks, and rating books.
-
----
-
-## 🚀 Live Demo & Architecture
-
-- **Frontend App (Netlify)**: Deploy on Netlify (e.g. `https://your-bookshelf.netlify.app`)
-- **Backend API (Render)**: Deploy on Render (e.g. `https://bookshelf-tracker-api.onrender.com`)
-- **Database**: MongoDB Atlas
-- **Authentication**: JWT & Google OAuth 2.0
-- **CI/CD**: GitHub Actions
+**BookShelf AI** is a production-grade full-stack MERN (MongoDB, Express, React, Node.js) web application engineered for book lovers, avid readers, and researchers. It combines a modern Goodreads/Notion-inspired SaaS interface with AI-driven book recommendations, Google Books API live discovery, interactive reading statistics, and progress tracking.
 
 ---
 
-## 🛠️ Project Setup & Local Development
+## ✨ Key Features
 
-### Prerequisites
-- Node.js (v18 or higher)
-- MongoDB Atlas database URI
-- Google Cloud OAuth Credentials (Optional for local Google Login)
+### 🤖 1. Gemini AI Book Recommendations & Insights
+- **Smart Recommendations (`POST /api/ai/recommend`)**: Analyzes reading history, ratings, favorite genres, and user reviews using Google Gemini AI to generate 5 personalized recommendations with match confidence score, difficulty rating, and estimated reading time.
+- **Reading Habits & Insights (`GET /api/ai/insights`)**: Calculates reading speed, reading streak, monthly completion summaries, and automated goal recommendations.
 
-### 1. Backend Setup
-```bash
-cd backend
-npm install
-```
-Create a `.env` file in `./backend` based on `.env.example`:
+### 🌐 2. Live Google Books Discovery
+- **Online Search**: Search millions of books worldwide by Title, Author, or Keyword via Google Books API.
+- **1-Click Import**: Preview cover artwork, descriptions, and page counts, then import books directly into your personal digital shelf with one click.
+
+### 📊 3. Modern SaaS Dashboard & Analytics
+- **Hero Metrics**: Instant count of Total Books, Reading, Finished, Want to Read, Favorites, Average Rating, and Top Genre.
+- **Visual Analytics**: Interactive Recharts graphs showing Monthly Reading Trends, Genre Breakdown, and Rating Distribution.
+- **Goal Progress Tracking**: Set annual or monthly reading goals with dynamic visual completion bars.
+
+### 📚 4. Book Library Management
+- **Search & Multi-Filter**: Filter by Status, Genre, or Rating; search by Title, Author, or Genre; sort by Date Added, Title, Rating, or Reading Progress.
+- **Reading Progress Bar**: Log current page against total pages to calculate exact reading percentage.
+- **Star Ratings & Reviews**: Rate books 1-5 stars and attach personalized reviews.
+- **Favorites & Notes**: Heart favorite books and save book notes/quotes.
+
+### 🔒 5. Security & Authentication
+- JWT Token Authentication & Google OAuth 2.0.
+- Profile Management: Update first/last name, bio, favorite genres, custom avatar URL, and change password.
+- Server Security: Helmet HTTP security headers, CORS origin allowlists, and Express Rate Limiting.
+
+---
+
+## 🛠️ Tech Stack
+
+### Frontend
+- **Framework**: React 18, Vite 8
+- **Styling**: Tailwind CSS 4, DaisyUI 5, Glassmorphic Modern UI
+- **Icons & Motion**: Lucide React Icons, Framer Motion
+- **Charts**: Recharts
+- **State & Router**: React Context API, React Router DOM v6
+- **Notifications**: React Hot Toast
+
+### Backend
+- **Runtime**: Node.js, Express.js
+- **Database**: MongoDB Atlas via Mongoose ODM
+- **AI Integration**: Google Generative AI (`@google/generative-ai` / Gemini 1.5 Flash)
+- **Authentication**: JSON Web Tokens (JWT), Passport.js (Google OAuth 2.0), Bcrypt.js
+- **Security**: Helmet, Express Rate Limit, CORS Allowlist
+
+---
+
+## 🚀 Environment Variables Setup
+
+### Backend Environment Variables (`./backend/.env`)
 ```env
-MONGO_URI=your_mongodb_connection_string
 PORT=5000
-JWT_SECRET=supersecretjwtkey_bookshelf
+NODE_ENV=production
+MONGO_URI=mongodb+srv://user:password@cluster.mongodb.net/book_shelf_tracker
+JWT_SECRET=supersecretjwtkey_bookshelf_2026
+FRONTEND_URL=https://your-frontend.netlify.app
+BACKEND_URL=https://your-backend.onrender.com
 GOOGLE_CLIENT_ID=your_google_client_id
 GOOGLE_CLIENT_SECRET=your_google_client_secret
-FRONTEND_URL=http://localhost:5173
-BACKEND_URL=http://localhost:5000
-NODE_ENV=development
-```
-Start backend dev server:
-```bash
-npm run dev
+GEMINI_API_KEY=your_gemini_api_key
 ```
 
-### 2. Frontend Setup
-```bash
-cd frontend
-npm install
-```
-Create a `.env` file in `./frontend`:
+### Frontend Environment Variables (`./frontend/.env`)
 ```env
 VITE_API_URL=http://localhost:5000
 ```
-Start frontend dev server:
-```bash
-npm run dev
-```
 
 ---
 
-## 🌐 Week 6 Deployment Instructions
+## 🔌 API Endpoints Summary
 
-### Step 1: Deploy Backend to Render
-1. Sign in to [Render](https://render.com/).
-2. Click **New +** -> **Web Service**.
-3. Connect your GitHub repository `MohammadSahid232/Book-Shelf-Tracker`.
-4. Set the following settings:
-   - **Root Directory**: `backend`
-   - **Environment**: `Node`
-   - **Build Command**: `npm install`
-   - **Start Command**: `npm start`
-5. Add the Environment Variables under **Environment**:
-   - `MONGO_URI`: Your MongoDB Atlas connection string
-   - `JWT_SECRET`: A strong secret key
-   - `FRONTEND_URL`: Your Netlify URL (e.g., `https://your-bookshelf.netlify.app`)
-   - `BACKEND_URL`: Your Render Service URL (e.g., `https://bookshelf-tracker-api.onrender.com`)
-   - `GOOGLE_CLIENT_ID`: Your Google OAuth Client ID
-   - `GOOGLE_CLIENT_SECRET`: Your Google OAuth Client Secret
-   - `NODE_ENV`: `production`
-6. Click **Create Web Service**.
+### Authentication Routes (`/auth` / `/api/auth`)
+- `POST /auth/register` — Register a new account
+- `POST /auth/login` — Sign in and retrieve JWT token
+- `GET /auth/me` — Fetch current user profile
+- `PUT /auth/profile` — Update user profile & avatar
+- `PUT /auth/change-password` — Change account password
+- `GET /auth/google` — Initiate Google OAuth 2.0 flow
 
----
+### Book Management Routes (`/api/books`)
+- `GET /api/books` — Retrieve user books (query params: `search`, `status`, `genre`, `rating`, `sortBy`, `order`)
+- `GET /api/books/stats` — Fetch dashboard metrics and chart statistics
+- `GET /api/books/:id` — Retrieve a single book by ID
+- `POST /api/books` — Add a new book to library
+- `PATCH /api/books/:id` / `PUT /api/books/:id` — Update book details or reading progress
+- `DELETE /api/books/:id` — Remove book from library
 
-### Step 2: Deploy Frontend to Netlify
-1. Sign in to [Netlify](https://www.netlify.com/).
-2. Click **Add new site** -> **Import an existing project**.
-3. Select **GitHub** and choose `MohammadSahid232/Book-Shelf-Tracker`.
-4. Configure Build settings:
-   - **Base directory**: `frontend`
-   - **Build command**: `npm run build`
-   - **Publish directory**: `dist`
-5. Add Environment Variable under **Site configuration** -> **Environment variables**:
-   - `VITE_API_URL`: Your Render backend URL (e.g., `https://bookshelf-tracker-api.onrender.com`)
-6. Click **Deploy site**.
+### AI Module Routes (`/api/ai`)
+- `POST /api/ai/recommend` — Generate 5 Gemini AI book recommendations
+- `GET /api/ai/insights` — Generate reading speed and streak insights
+
+### Discover Routes (`/api/discover`)
+- `GET /api/discover/search?q=...` — Search Google Books API live
 
 ---
 
-### Step 3: Update Google OAuth Redirect URIs
-In the [Google Cloud Console](https://console.cloud.google.com/):
-1. Go to **Credentials** -> **OAuth 2.0 Client IDs**.
-2. Add under **Authorized JavaScript origins**:
-   - `https://your-bookshelf.netlify.app`
-3. Add under **Authorized redirect URIs**:
-   - `https://bookshelf-tracker-api.onrender.com/auth/google/callback`
+## 🌐 Deployment Instructions
 
----
+### Render Deployment (Backend)
+1. Repository: `MohammadSahid232/Book-Shelf-Tracker-backend`
+2. Environment: `Node`
+3. Build Command: `npm install`
+4. Start Command: `node server.js`
+5. Set Environment Variables listed above.
 
-### Step 4: GitHub Actions CI/CD
-The project includes a automated workflow at `.github/workflows/ci.yml`.
-On every `push` or `pull_request` to `main`, GitHub Actions automatically:
-- Runs backend test suites (`npm test`)
-- Validates production frontend builds (`npm run build`)
-
----
-
-### Step 5: Tag & Push v1.0 Release
-To create and publish the v1.0 release tag on GitHub:
-```bash
-git add .
-git commit -m "feat(deploy): complete week 6 deployment, CI/CD pipeline, and bug fixes"
-git tag -a v1.0 -m "Release v1.0 - Production Live Deployment"
-git push origin main
-git push origin v1.0
-```
-
----
-
-## 🧪 Testing Production Flows (CRUD Verification)
-Once both URLs are live:
-1. **User Registration & Authentication**:
-   - Register a new account at `/register`.
-   - Sign in at `/login` with credentials.
-   - Verify JWT authorization header is passed.
-2. **Book Operations**:
-   - Add a new book to "Want to Read".
-   - Update book status to "Currently Reading" or "Finished".
-   - Update book rating/reviews.
-   - Delete a book and verify UI updates immediately.
-3. **SPA Routing**:
-   - Refresh the browser page on direct routes like `/books` or `/admin/dashboard` to verify Netlify redirects without 404 errors.
+### Netlify Deployment (Frontend)
+1. Repository: `MohammadSahid232/Book-Shelf-Tracker`
+2. Base Directory: `frontend`
+3. Build Command: `npm run build`
+4. Publish Directory: `dist`
+5. Environment Variable: `VITE_API_URL` = *(Your Render backend URL)*

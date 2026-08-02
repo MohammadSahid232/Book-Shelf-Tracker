@@ -3,7 +3,6 @@ import axios from 'axios';
 
 const AuthContext = createContext();
 
-// Use environment variable for API base URL — set VITE_API_URL in .env / Netlify env vars
 const BACKEND_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 export const AuthProvider = ({ children }) => {
@@ -27,9 +26,7 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Synchronize token & user state with localStorage & handle Google OAuth URL parameters
   useEffect(() => {
-    // Check for Google OAuth callback parameters in URL
     const params = new URLSearchParams(window.location.search);
     const urlToken = params.get('token');
     const urlUserStr = params.get('user');
@@ -48,7 +45,6 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
-  // Update localStorage when token or user state changes
   useEffect(() => {
     if (token) {
       localStorage.setItem('token', token);
@@ -65,7 +61,6 @@ export const AuthProvider = ({ children }) => {
     }
   }, [token, user]);
 
-  // Login User via Backend API
   const login = async (credentials) => {
     setLoading(true);
     setError('');
@@ -81,7 +76,6 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem('token', newToken);
       }
       if (userData) {
-        // Map user object fields for compatibility (first_name / name, role)
         const formattedUser = {
           id: userData.id || userData._id,
           name: userData.first_name
@@ -90,7 +84,10 @@ export const AuthProvider = ({ children }) => {
           first_name: userData.first_name,
           last_name: userData.last_name,
           email: userData.email,
-          role: userData.role === 'admin' ? 'admin' : (payload.email === 'admin@bookshelf.com' ? 'admin' : 'user')
+          role: userData.role || 'user',
+          avatar: userData.avatar || '',
+          bio: userData.bio || '',
+          favoriteGenres: userData.favoriteGenres || [],
         };
         setUser(formattedUser);
         localStorage.setItem('user', JSON.stringify(formattedUser));
@@ -107,13 +104,10 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Register User via Backend API
   const register = async (registerData) => {
     setLoading(true);
     setError('');
 
-    // Normalize form fields for AuthController backend
-    // Always use object form — arrow functions don't have 'arguments'
     let payload;
     if (typeof registerData === 'object' && registerData !== null) {
       payload = {
@@ -122,12 +116,8 @@ export const AuthProvider = ({ children }) => {
         email: registerData.email,
         password: registerData.password,
         confirm_password: registerData.confirm_password || registerData.confirmPassword || registerData.password,
-        accept_terms: registerData.accept_terms !== undefined ? registerData.accept_terms : true
       };
     } else {
-      // Fallback: registerData is the name (string), not supported — return error
-      console.error('register() requires an object argument');
-      setLoading(false);
       return { success: false, message: 'Registration error. Please try again.' };
     }
 
@@ -143,7 +133,38 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Logout
+  const updateProfile = async (profileData) => {
+    try {
+      const activeToken = token || localStorage.getItem('token');
+      const response = await axios.put(`${BACKEND_URL}/auth/profile`, profileData, {
+        headers: { Authorization: `Bearer ${activeToken}` },
+      });
+      const updatedUser = response.data.user;
+      const formatted = {
+        ...user,
+        ...updatedUser,
+        name: `${updatedUser.first_name || ''} ${updatedUser.last_name || ''}`.trim() || user?.name,
+      };
+      setUser(formatted);
+      localStorage.setItem('user', JSON.stringify(formatted));
+      return { success: true, user: formatted };
+    } catch (err) {
+      return { success: false, message: err.response?.data?.message || 'Failed to update profile' };
+    }
+  };
+
+  const changePassword = async (passwords) => {
+    try {
+      const activeToken = token || localStorage.getItem('token');
+      const response = await axios.put(`${BACKEND_URL}/auth/change-password`, passwords, {
+        headers: { Authorization: `Bearer ${activeToken}` },
+      });
+      return { success: true, message: response.data.message };
+    } catch (err) {
+      return { success: false, message: err.response?.data?.message || 'Failed to change password' };
+    }
+  };
+
   const logout = async () => {
     setToken(null);
     setUser(null);
@@ -152,14 +173,28 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('bst_user');
   };
 
-  // Helper for Authorization Headers
   const getAuthHeaders = () => {
     const activeToken = token || localStorage.getItem('token');
     return activeToken ? { Authorization: `Bearer ${activeToken}` } : {};
   };
 
   return (
-    <AuthContext.Provider value={{ token, user, loading, error, setError, login, register, logout, getAuthHeaders, BACKEND_URL }}>
+    <AuthContext.Provider
+      value={{
+        token,
+        user,
+        loading,
+        error,
+        setError,
+        login,
+        register,
+        updateProfile,
+        changePassword,
+        logout,
+        getAuthHeaders,
+        BACKEND_URL,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

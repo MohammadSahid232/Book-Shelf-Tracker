@@ -2,327 +2,270 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import BookCard from '../components/BookCard';
-import Column from '../components/Column';
-
-const API = 'http://localhost:5000/api/books';
-
-const statusOptions = ['want to read', 'reading', 'finished'];
-
-const emptyForm = { title: '', author: '', genre: '', status: 'want to read', rating: '', review: '' };
+import BookModal from '../components/BookModal';
+import StatCard from '../components/StatCard';
+import ReadingChart from '../components/ReadingChart';
+import NotesDrawer from '../components/NotesDrawer';
+import {
+  BookOpen,
+  BookMarked,
+  CheckCircle2,
+  Heart,
+  Award,
+  Plus,
+  TrendingUp,
+  Flame,
+} from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function Dashboard() {
-  const { user, getAuthHeaders } = useAuth();
+  const { getAuthHeaders, BACKEND_URL, user } = useAuth();
   const [books, setBooks] = useState([]);
+  const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingBook, setEditingBook] = useState(null);
+  const [selectedBook, setSelectedBook] = useState(null);
+  const [isNotesOpen, setIsNotesOpen] = useState(false);
 
-  // Modal state
-  const [showModal, setShowModal] = useState(false);
-  const [editingBook, setEditingBook] = useState(null); // null = add, object = edit
-  const [form, setForm] = useState(emptyForm);
-  const [submitting, setSubmitting] = useState(false);
-  const [formError, setFormError] = useState('');
+  // Goals
+  const [goal, setGoal] = useState({ target: 20, current: 0 });
 
-  const getHeaders = () => ({
-    'Content-Type': 'application/json',
-    ...getAuthHeaders()
-  });
-
-  useEffect(() => {
-    fetchBooks();
-  }, []);
-
-  const fetchBooks = async () => {
+  const fetchDashboardData = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(API, { headers: getHeaders() });
-      setBooks(response.data);
+      const headers = getAuthHeaders();
+      const [booksRes, statsRes] = await Promise.all([
+        axios.get(`${BACKEND_URL}/api/books`, { headers }),
+        axios.get(`${BACKEND_URL}/api/books/stats`, { headers }).catch(() => ({ data: null })),
+      ]);
+
+      setBooks(booksRes.data || []);
+      if (statsRes.data) {
+        setStats(statsRes.data);
+      }
     } catch (err) {
-      setError('Failed to load books. Is the backend running?');
+      console.error('Failed to fetch dashboard data:', err);
+      toast.error('Failed to load dashboard');
     } finally {
       setLoading(false);
     }
   };
 
-  const openAddModal = () => {
-    setEditingBook(null);
-    setForm(emptyForm);
-    setFormError('');
-    setShowModal(true);
-  };
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
 
-  const openEditModal = (book) => {
-    setEditingBook(book);
-    setForm({
-      title: book.title || '',
-      author: book.author || '',
-      genre: book.genre || '',
-      status: book.status || 'want to read',
-      rating: book.rating || '',
-      review: book.review || '',
-    });
-    setFormError('');
-    setShowModal(true);
-  };
-
-  const closeModal = () => {
-    setShowModal(false);
-    setEditingBook(null);
-    setForm(emptyForm);
-    setFormError('');
-  };
-
-  const handleFormSubmit = async (e) => {
-    e.preventDefault();
-    setFormError('');
-    setSubmitting(true);
-
-    const payload = {
-      title: form.title.trim(),
-      author: form.author.trim(),
-      genre: form.genre.trim(),
-      status: form.status,
-      rating: form.rating ? parseInt(form.rating) : null,
-      review: form.review.trim(),
-    };
-
+  const handleSaveBook = async (formData) => {
     try {
+      const headers = getAuthHeaders();
       if (editingBook) {
-        await axios.patch(`${API}/${editingBook.id}`, payload, { headers: getHeaders() });
+        await axios.patch(`${BACKEND_URL}/api/books/${editingBook._id || editingBook.id}`, formData, { headers });
+        toast.success('Book updated successfully! 🎉');
       } else {
-        await axios.post(API, payload, { headers: getHeaders() });
+        await axios.post(`${BACKEND_URL}/api/books`, formData, { headers });
+        toast.success('Book added to your library! 📚');
       }
-      await fetchBooks();
-      closeModal();
+      setIsModalOpen(false);
+      setEditingBook(null);
+      fetchDashboardData();
     } catch (err) {
-      const errorMsg = err.response?.data?.message || err.response?.data?.errors?.[0]?.msg || 'Cannot connect to server.';
-      setFormError(errorMsg);
-    } finally {
-      setSubmitting(false);
+      toast.error(err.response?.data?.message || 'Error saving book');
     }
   };
 
-  const handleDelete = async (bookId) => {
+  const handleDeleteBook = async (id) => {
     if (!window.confirm('Are you sure you want to delete this book?')) return;
     try {
-      await axios.delete(`${API}/${bookId}`, {
-        headers: getHeaders(),
-      });
-      setBooks((prev) => prev.filter((b) => b.id !== bookId));
+      const headers = getAuthHeaders();
+      await axios.delete(`${BACKEND_URL}/api/books/${id}`, { headers });
+      toast.success('Book deleted');
+      fetchDashboardData();
     } catch (err) {
-      setError('Failed to delete book.');
+      toast.error('Failed to delete book');
     }
   };
 
-  const grouped = {
-    'want to read': books.filter((b) => b.status === 'want to read'),
-    'reading': books.filter((b) => b.status === 'reading'),
-    'finished': books.filter((b) => b.status === 'finished'),
+  const handleToggleFavorite = async (id, favorite) => {
+    try {
+      const headers = getAuthHeaders();
+      await axios.patch(`${BACKEND_URL}/api/books/${id}`, { favorite }, { headers });
+      fetchDashboardData();
+    } catch (err) {
+      toast.error('Error updating favorite');
+    }
   };
 
-  const colTitles = { 'want to read': 'Want to Read', reading: 'Reading', finished: 'Finished' };
-  const colBorderColors = { 'want to read': 'border-blue-500', reading: 'border-yellow-500', finished: 'border-green-500' };
+  const handleStatusChange = async (id, newStatus) => {
+    try {
+      const headers = getAuthHeaders();
+      await axios.patch(`${BACKEND_URL}/api/books/${id}`, { status: newStatus }, { headers });
+      toast.success(`Moved to ${newStatus}`);
+      fetchDashboardData();
+    } catch (err) {
+      toast.error('Error updating status');
+    }
+  };
+
+  // Metrics calculation fallback
+  const totalBooks = stats?.totalBooks || books.length;
+  const wantToRead = stats?.wantToRead || books.filter((b) => b.status === 'want to read').length;
+  const reading = stats?.reading || books.filter((b) => b.status === 'reading').length;
+  const finished = stats?.finished || books.filter((b) => b.status === 'finished').length;
+  const favorites = stats?.favorites || books.filter((b) => b.favorite).length;
+  const avgRating = stats?.avgRating || '0.0';
+  const favoriteGenre = stats?.favoriteGenre || 'Fiction';
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-neutral-900 p-6">
-      {/* Header Row */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+    <div className="min-h-screen bg-slate-50 dark:bg-neutral-900 text-slate-900 dark:text-slate-100 p-4 md:p-8 space-y-8 transition-colors">
+      {/* Header Banner */}
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-linear-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-3xl p-6 md:p-8 text-white shadow-xl shadow-blue-500/10">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-50">
-            📚 Dashboard
-          </h1>
-          <p className="text-slate-500 dark:text-slate-400 mt-1">
-            Welcome, {user?.name || user?.first_name || 'User'}. Manage your bookshelf below.
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-bold mb-3">
+            <Flame className="w-4 h-4 text-amber-300 fill-amber-300" />
+            <span>Welcome Back, {user?.name || user?.first_name || 'Book Lover'}</span>
+          </div>
+          <h1 className="text-2xl md:text-4xl font-extrabold tracking-tight">Your Personal BookShelf Dashboard</h1>
+          <p className="text-blue-100 text-sm mt-1 max-w-xl">
+            Track reading goals, explore analytics, and manage your library seamlessly.
           </p>
         </div>
+
         <button
-          onClick={openAddModal}
-          id="add-book-btn"
-          className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+          onClick={() => {
+            setEditingBook(null);
+            setIsModalOpen(true);
+          }}
+          className="px-5 py-3 bg-white text-blue-700 hover:bg-blue-50 font-bold rounded-2xl shadow-lg transition-all transform hover:scale-105 flex items-center gap-2 text-sm"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-          </svg>
-          Add Book
+          <Plus className="w-5 h-5" />
+          Add Book to Library
         </button>
       </div>
 
-      {/* Stats Strip */}
-      <div className="grid grid-cols-3 gap-4 mb-8">
-        {Object.entries(grouped).map(([status, bks]) => (
-          <div key={status} className="bg-white dark:bg-neutral-800 rounded-xl p-4 border border-slate-200 dark:border-neutral-700 shadow-sm text-center">
-            <p className="text-2xl font-bold text-slate-900 dark:text-slate-50">{bks.length}</p>
-            <p className="text-sm text-slate-500 dark:text-slate-400 capitalize">{colTitles[status]}</p>
-          </div>
-        ))}
+      {/* Hero Stat Cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard icon={BookOpen} label="Total Books" value={totalBooks} accent="blue" />
+        <StatCard icon={BookMarked} label="Currently Reading" value={reading} accent="amber" />
+        <StatCard icon={CheckCircle2} label="Finished Books" value={finished} accent="emerald" />
+        <StatCard icon={Heart} label="Favorite Books" value={favorites} accent="rose" />
       </div>
 
-      {/* Error Banner */}
-      {error && (
-        <div className="mb-6 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm dark:bg-red-900/30 dark:border-red-800 dark:text-red-300">
-          {error}
-        </div>
-      )}
-
-      {/* Book Columns */}
-      {loading ? (
-        <div className="flex flex-col items-center justify-center py-20 gap-3">
-          <span className="loading loading-spinner loading-lg text-blue-600"></span>
-          <p className="text-sm font-semibold text-slate-500 dark:text-slate-400 animate-pulse">Loading books...</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {Object.entries(grouped).map(([status, bks]) => (
-            <Column
-              key={status}
-              title={colTitles[status]}
-              count={bks.length}
-              borderColor={colBorderColors[status]}
-            >
-              {bks.map((book) => (
-                <BookCard
-                  key={book.id}
-                  book={book}
-                  onEdit={openEditModal}
-                  onDelete={handleDelete}
-                />
-              ))}
-            </Column>
-          ))}
-        </div>
-      )}
-
-      {/* Add / Edit Modal */}
-      {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className="bg-white dark:bg-neutral-800 rounded-2xl shadow-2xl w-full max-w-md border border-slate-200 dark:border-neutral-700 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-neutral-700">
-              <h3 className="text-lg font-bold text-slate-900 dark:text-slate-50">
-                {editingBook ? 'Edit Book' : 'Add New Book'}
+      {/* Reading Goal & Stats Summary Banner */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Annual Reading Goal Card */}
+        <div className="bg-white dark:bg-neutral-800/90 border border-slate-200/80 dark:border-neutral-700/80 rounded-3xl p-6 shadow-xs flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between">
+              <h3 className="font-bold text-base text-slate-900 dark:text-white flex items-center gap-2">
+                <Award className="w-5 h-5 text-indigo-500" />
+                2026 Reading Goal
               </h3>
-              <button
-                onClick={closeModal}
-                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
-              >
-                ✕
-              </button>
+              <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 dark:bg-indigo-950/50 dark:text-indigo-300">
+                {finished} / {goal.target} Books
+              </span>
             </div>
 
-            <form onSubmit={handleFormSubmit} className="p-6 space-y-4">
-              {formError && (
-                <div className="p-3 bg-red-50 text-red-700 rounded-lg text-sm border border-red-200">
-                  {formError}
-                </div>
-              )}
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                  Title *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={form.title}
-                  onChange={(e) => setForm({ ...form, title: e.target.value })}
-                  placeholder="e.g. The Alchemist"
-                  className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-neutral-600 bg-white dark:bg-neutral-700 text-slate-900 dark:text-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            <div className="mt-6 space-y-2">
+              <div className="flex justify-between text-xs font-bold text-slate-600 dark:text-slate-400">
+                <span>Goal Completion</span>
+                <span>{Math.min(100, Math.round((finished / goal.target) * 100))}%</span>
+              </div>
+              <div className="w-full bg-slate-100 dark:bg-neutral-700 rounded-full h-3 overflow-hidden">
+                <div
+                  className="h-full bg-linear-to-r from-indigo-500 to-purple-600 rounded-full transition-all duration-700"
+                  style={{ width: `${Math.min(100, (finished / goal.target) * 100)}%` }}
                 />
               </div>
+            </div>
+          </div>
 
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                  Author
-                </label>
-                <input
-                  type="text"
-                  value={form.author}
-                  onChange={(e) => setForm({ ...form, author: e.target.value })}
-                  placeholder="e.g. Paulo Coelho"
-                  className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-neutral-600 bg-white dark:bg-neutral-700 text-slate-900 dark:text-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                  Genre
-                </label>
-                <input
-                  type="text"
-                  value={form.genre}
-                  onChange={(e) => setForm({ ...form, genre: e.target.value })}
-                  placeholder="e.g. Fiction, Classic"
-                  className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-neutral-600 bg-white dark:bg-neutral-700 text-slate-900 dark:text-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                  Status
-                </label>
-                <select
-                  value={form.status}
-                  onChange={(e) => setForm({ ...form, status: e.target.value })}
-                  className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-neutral-600 bg-white dark:bg-neutral-700 text-slate-900 dark:text-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                >
-                  {statusOptions.map((s) => (
-                    <option key={s} value={s}>
-                      {s.charAt(0).toUpperCase() + s.slice(1)}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                  Rating (1-5)
-                </label>
-                <select
-                  value={form.rating}
-                  onChange={(e) => setForm({ ...form, rating: e.target.value })}
-                  className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-neutral-600 bg-white dark:bg-neutral-700 text-slate-900 dark:text-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                >
-                  <option value="">No rating</option>
-                  {[1, 2, 3, 4, 5].map((num) => (
-                    <option key={num} value={num}>
-                      {num} {num === 1 ? 'Star' : 'Stars'}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                  Review / Notes
-                </label>
-                <textarea
-                  rows={3}
-                  value={form.review}
-                  onChange={(e) => setForm({ ...form, review: e.target.value })}
-                  placeholder="What did you think of this book?"
-                  className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-neutral-600 bg-white dark:bg-neutral-700 text-slate-900 dark:text-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none resize-none"
-                />
-              </div>
-
-              <div className="flex justify-end gap-3 pt-4 border-t border-slate-200 dark:border-neutral-700">
-                <button
-                  type="button"
-                  onClick={closeModal}
-                  className="px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-neutral-700 rounded-lg"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg disabled:opacity-60"
-                >
-                  {submitting ? 'Saving...' : editingBook ? 'Save Changes' : 'Add Book'}
-                </button>
-              </div>
-            </form>
+          <div className="mt-6 pt-4 border-t border-slate-100 dark:border-neutral-700/60 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+            <span>Avg Rating: <strong className="text-amber-500">{avgRating} ★</strong></span>
+            <span>Top Genre: <strong className="text-blue-500">{favoriteGenre}</strong></span>
           </div>
         </div>
-      )}
+
+        <div className="lg:col-span-2">
+          <ReadingChart
+            monthlyStats={stats?.monthlyStats || []}
+            genreDistribution={stats?.genreDistribution || []}
+            ratingDistribution={stats?.ratingDistribution || []}
+          />
+        </div>
+      </div>
+
+      {/* Book Shelves Grid */}
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-extrabold text-slate-900 dark:text-white tracking-tight">Your Reading Shelf</h2>
+          <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+            Showing {books.length} Total Books
+          </span>
+        </div>
+
+        {loading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="h-64 rounded-2xl bg-slate-200 dark:bg-neutral-800 animate-pulse" />
+            ))}
+          </div>
+        ) : books.length === 0 ? (
+          <div className="bg-white dark:bg-neutral-800 rounded-3xl p-12 text-center border border-slate-200 dark:border-neutral-700">
+            <BookOpen className="w-12 h-12 text-slate-300 dark:text-neutral-600 mx-auto mb-3" />
+            <h3 className="text-lg font-bold text-slate-800 dark:text-white">Your Shelf is Empty</h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-sm mx-auto">
+              Start building your personal digital library by adding your first book.
+            </p>
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="mt-4 px-4 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-all shadow-md shadow-blue-500/20"
+            >
+              + Add First Book
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+            {books.map((book) => (
+              <BookCard
+                key={book._id || book.id}
+                book={book}
+                onEdit={(b) => {
+                  setEditingBook(b);
+                  setIsModalOpen(true);
+                }}
+                onDelete={handleDeleteBook}
+                onToggleFavorite={handleToggleFavorite}
+                onStatusChange={handleStatusChange}
+                onOpenNotes={(b) => {
+                  setSelectedBook(b);
+                  setIsNotesOpen(true);
+                }}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Book Modal */}
+      <BookModal
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setEditingBook(null);
+        }}
+        onSave={handleSaveBook}
+        editingBook={editingBook}
+      />
+
+      <NotesDrawer
+        isOpen={isNotesOpen}
+        onClose={() => {
+          setIsNotesOpen(false);
+          setSelectedBook(null);
+        }}
+        book={selectedBook}
+      />
     </div>
   );
 }

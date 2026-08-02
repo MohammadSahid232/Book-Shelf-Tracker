@@ -1,95 +1,163 @@
 import React from 'react';
-import { FaEdit, FaTrash, FaStar, FaRegStar, FaBookOpen } from 'react-icons/fa';
+import { Star, Heart, BookOpen, Edit3, Trash2, NotebookPen } from 'lucide-react';
 
-const statusColors = {
-  'want to read': 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-800',
-  'reading': 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/20 dark:text-amber-300 dark:border-amber-800',
-  'finished': 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-300 dark:border-emerald-800',
-};
-
-const statusLabels = {
-  'want to read': 'Want to Read',
-  'reading': 'Reading',
-  'finished': 'Finished',
-};
-
-export default function BookCard({ book, onEdit, onDelete }) {
+export default function BookCard({ book, onEdit, onDelete, onToggleFavorite, onStatusChange, onOpenNotes }) {
   const isFinished = book.status === 'finished';
+  const progress = book.readingProgress || (book.totalPages > 0 ? Math.round((book.currentPage / book.totalPages) * 100) : (isFinished ? 100 : 0));
 
-  // Render star ratings (1 to 5) dynamically
-  const renderStars = (rating) => {
-    const stars = [];
-    const activeRating = rating || 0;
-    for (let i = 1; i <= 5; i++) {
-      if (i <= activeRating) {
-        stars.push(<FaStar key={i} className="text-amber-400 w-4 h-4" />);
-      } else {
-        stars.push(<FaRegStar key={i} className="text-slate-300 dark:text-neutral-600 w-4 h-4" />);
-      }
-    }
-    return <div className="flex items-center gap-0.5 mt-2">{stars}</div>;
+  const statusColors = {
+    'want to read': 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800',
+    'reading': 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800',
+    'finished': 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800',
+  };
+
+  const statusLabels = {
+    'want to read': 'Want to Read',
+    'reading': 'Reading',
+    'finished': 'Finished',
   };
 
   return (
-    <div className="group relative bg-white dark:bg-neutral-800 rounded-2xl border border-slate-200 dark:border-neutral-700/80 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 p-5 flex flex-col h-full justify-between">
+    <div className="group relative bg-white dark:bg-neutral-800/90 rounded-2xl border border-slate-200/80 dark:border-neutral-700/80 shadow-xs hover:shadow-xl hover:-translate-y-1 transition-all duration-300 p-4 flex flex-col justify-between overflow-hidden">
       <div>
-        {/* Cover Placeholder */}
-        <div className="relative w-full h-44 rounded-xl bg-slate-100 dark:bg-neutral-700/50 flex items-center justify-center mb-4 overflow-hidden border border-slate-200/50 dark:border-neutral-700/30">
-          <FaBookOpen className="w-12 h-12 text-slate-300 dark:text-neutral-600 group-hover:scale-110 transition-transform duration-300" />
+        {/* Cover Image or Placeholder */}
+        <div className="relative w-full h-48 rounded-xl bg-slate-100 dark:bg-neutral-700/40 overflow-hidden mb-3 border border-slate-200/60 dark:border-neutral-700/50 flex items-center justify-center">
+          {book.coverImage ? (
+            <img
+              src={book.coverImage}
+              alt={book.title}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.style.display = 'none';
+              }}
+            />
+          ) : (
+            <div className="flex flex-col items-center gap-2 text-slate-400 dark:text-neutral-500">
+              <BookOpen className="w-10 h-10 stroke-1" />
+              <span className="text-[11px] font-semibold tracking-wide uppercase">No Cover</span>
+            </div>
+          )}
+
+          {/* Genre Badge */}
           {book.genre && (
-            <span className="absolute top-3 left-3 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-slate-900/80 text-white rounded-md backdrop-blur-xs">
+            <span className="absolute top-2.5 left-2.5 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-slate-900/80 text-white rounded-lg backdrop-blur-md shadow-xs">
               {book.genre}
             </span>
           )}
+
+          {/* Favorite Button */}
+          <button
+            onClick={() => onToggleFavorite && onToggleFavorite(book._id || book.id, !book.favorite)}
+            title={book.favorite ? 'Remove Favorite' : 'Mark as Favorite'}
+            className="absolute top-2.5 right-2.5 p-1.5 rounded-full bg-white/80 dark:bg-neutral-900/80 text-rose-500 hover:scale-110 transition-transform shadow-md backdrop-blur-md"
+          >
+            <Heart className={`w-4 h-4 ${book.favorite ? 'fill-rose-500 text-rose-500' : 'text-slate-400 hover:text-rose-500'}`} />
+          </button>
         </div>
 
-        {/* Details */}
-        <h3 className="font-bold text-slate-800 dark:text-slate-100 text-base leading-snug line-clamp-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+        {/* Book Details */}
+        <h3 className="font-bold text-slate-900 dark:text-white text-base leading-snug line-clamp-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
           {book.title}
         </h3>
-        <p className="text-sm text-slate-500 dark:text-slate-400 font-medium truncate mt-1">
+        <p className="text-xs text-slate-500 dark:text-slate-400 font-medium truncate mt-0.5">
           by {book.author || 'Unknown Author'}
         </p>
 
-        <div className="mt-3 flex flex-wrap gap-2 items-center">
-          <span className={`inline-flex px-2.5 py-0.5 text-xs font-semibold rounded-full border ${statusColors[book.status] || ''}`}>
-            {statusLabels[book.status] || book.status}
-          </span>
+        {/* Progress Bar & Status */}
+        <div className="mt-3 space-y-2">
+          <div className="flex items-center justify-between text-[11px] font-bold text-slate-600 dark:text-slate-400">
+            <span className={`inline-flex px-2 py-0.5 rounded-md border text-[10px] uppercase tracking-wider font-extrabold ${statusColors[book.status] || ''}`}>
+              {statusLabels[book.status] || book.status}
+            </span>
+            <span>{progress}% Completed</span>
+          </div>
+
+          <div className="w-full bg-slate-100 dark:bg-neutral-700/60 rounded-full h-1.5 overflow-hidden">
+            <div
+              className={`h-full rounded-full transition-all duration-500 ${
+                isFinished ? 'bg-emerald-500' : book.status === 'reading' ? 'bg-amber-500' : 'bg-blue-500'
+              }`}
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+
+          {book.totalPages > 0 && (
+            <p className="text-[11px] text-slate-400 dark:text-slate-500 flex items-center justify-between">
+              <span>Pages: {book.currentPage || 0} / {book.totalPages}</span>
+            </p>
+          )}
         </div>
 
-        {/* Dynamic Star Rating - Shown for Finished books only */}
-        {isFinished && renderStars(book.rating)}
+        {/* Star Rating */}
+        {book.rating > 0 && (
+          <div className="flex items-center gap-1 mt-2.5">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <Star
+                key={star}
+                className={`w-3.5 h-3.5 ${
+                  star <= book.rating
+                    ? 'fill-amber-400 text-amber-400'
+                    : 'text-slate-200 dark:text-neutral-700'
+                }`}
+              />
+            ))}
+            <span className="text-xs font-bold text-slate-700 dark:text-slate-300 ml-1">{book.rating}.0</span>
+          </div>
+        )}
 
+        {/* Review snippet */}
         {book.review && (
-          <p className="text-xs text-slate-400 dark:text-slate-500 mt-3 italic line-clamp-2 leading-relaxed border-l-2 border-slate-200 dark:border-neutral-700 pl-2">
+          <p className="text-xs text-slate-500 dark:text-slate-400 italic line-clamp-2 mt-2 pt-2 border-t border-slate-100 dark:border-neutral-700/60">
             "{book.review}"
           </p>
         )}
       </div>
 
-      {/* Admin Action Buttons */}
-      {(onEdit || onDelete) && (
-        <div className="flex gap-2 justify-end items-center mt-5 pt-3 border-t border-slate-100 dark:border-neutral-700/50 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-200">
+      {/* Footer Action Buttons */}
+      <div className="flex items-center justify-between mt-4 pt-3 border-t border-slate-100 dark:border-neutral-700/60">
+        <select
+          value={book.status || 'want to read'}
+          onChange={(e) => onStatusChange && onStatusChange(book._id || book.id, e.target.value)}
+          className="text-xs font-semibold bg-slate-50 dark:bg-neutral-700/50 border border-slate-200 dark:border-neutral-700 text-slate-700 dark:text-slate-300 rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer"
+        >
+          <option value="want to read">Want to Read</option>
+          <option value="reading">Reading</option>
+          <option value="finished">Finished</option>
+        </select>
+
+        <div className="flex items-center gap-1">
+          {onOpenNotes && (
+            <button
+              onClick={() => onOpenNotes(book)}
+              title="Open Notes"
+              className="p-1.5 rounded-lg text-slate-400 hover:text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-950/30 transition-colors"
+            >
+              <NotebookPen className="w-4 h-4" />
+            </button>
+          )}
+
           {onEdit && (
             <button
               onClick={() => onEdit(book)}
               title="Edit Book"
-              className="p-2 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-blue-50 dark:text-slate-400 dark:hover:text-blue-400 dark:hover:bg-blue-900/30 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="p-1.5 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-colors"
             >
-              <FaEdit className="w-4 h-4" />
+              <Edit3 className="w-4 h-4" />
             </button>
           )}
+
           {onDelete && (
             <button
-              onClick={() => onDelete(book.id)}
+              onClick={() => onDelete(book._id || book.id)}
               title="Delete Book"
-              className="p-2 rounded-lg text-slate-500 hover:text-red-600 hover:bg-red-50 dark:text-slate-400 dark:hover:text-red-400 dark:hover:bg-red-900/30 transition-all focus:outline-none focus:ring-2 focus:ring-red-500"
+              className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
             >
-              <FaTrash className="w-4 h-4" />
+              <Trash2 className="w-4 h-4" />
             </button>
           )}
         </div>
-      )}
+      </div>
     </div>
   );
 }
