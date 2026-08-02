@@ -13,6 +13,9 @@ export default defineConfig({
       presets: [reactCompilerPreset()]
     })
   ],
+  optimizeDeps: {
+    include: ['react-is', 'recharts', 'react-pdf', 'pdfjs-dist']
+  },
   build: {
     outDir: 'dist',
     sourcemap: false,
