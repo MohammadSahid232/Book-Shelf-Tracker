@@ -6,9 +6,14 @@ import {
   LayoutDashboard,
   Compass,
   Sparkles,
-  User,
+  Search,
+  Folder,
+  Trophy,
+  Users,
   LogOut,
   CheckSquare,
+  BookMarked,
+  ShieldCheck,
 } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
 
@@ -29,67 +34,115 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
         {/* Brand Logo & Name */}
         <Link
-          to={user?.role === 'admin' ? '/admin/dashboard' : user ? '/books' : '/'}
+          to={user?.role === 'admin' ? '/admin/dashboard' : user ? '/library' : '/'}
           className="flex items-center gap-2.5 font-bold text-lg tracking-tight group"
         >
           <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-500 to-purple-500 text-white flex items-center justify-center shadow-md shadow-blue-500/20 group-hover:scale-105 transition-transform">
             <BookOpen className="w-5 h-5" />
           </div>
-          <span className="text-slate-900 dark:text-white font-extrabold text-xl bg-linear-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent">
+          <span className="text-slate-900 dark:text-white font-extrabold text-xl bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent">
             BookShelf<span className="text-purple-600 dark:text-purple-400 font-black ml-0.5">AI</span>
           </span>
         </Link>
 
         {/* Center Nav Links */}
         {user && (
-          <nav className="hidden md:flex items-center gap-1 bg-slate-100/70 dark:bg-neutral-800/70 p-1.5 rounded-2xl border border-slate-200/50 dark:border-neutral-700/50">
+          <nav className="hidden lg:flex items-center gap-1 bg-slate-100/70 dark:bg-neutral-800/70 p-1.5 rounded-2xl border border-slate-200/50 dark:border-neutral-700/50 overflow-x-auto scrollbar-hide">
             <Link
-              to={user.role === 'admin' ? '/admin/dashboard' : '/books'}
-              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                isActive('/admin/dashboard') || isActive('/books')
-                  ? 'bg-white dark:bg-neutral-700 text-blue-600 dark:text-blue-400 shadow-xs'
+              to="/library"
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                isActive('/library')
+                  ? 'bg-white dark:bg-neutral-700 text-indigo-600 dark:text-indigo-400 shadow-xs'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
-              <LayoutDashboard className="w-4 h-4" />
-              Dashboard
+              <BookOpen className="w-3.5 h-3.5" />
+              Library
             </Link>
 
             <Link
-              to="/discover"
-              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                isActive('/discover')
-                  ? 'bg-white dark:bg-neutral-700 text-blue-600 dark:text-blue-400 shadow-xs'
+              to="/search"
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                isActive('/search')
+                  ? 'bg-white dark:bg-neutral-700 text-indigo-600 dark:text-indigo-400 shadow-xs'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
-              <Compass className="w-4 h-4" />
-              Discover
+              <Search className="w-3.5 h-3.5" />
+              Search
+            </Link>
+
+            <Link
+              to="/my-library"
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                isActive('/my-library')
+                  ? 'bg-white dark:bg-neutral-700 text-indigo-600 dark:text-indigo-400 shadow-xs'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+              }`}
+            >
+              <BookMarked className="w-3.5 h-3.5" />
+              My Shelf
+            </Link>
+
+            <Link
+              to="/collections"
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                isActive('/collections')
+                  ? 'bg-white dark:bg-neutral-700 text-indigo-600 dark:text-indigo-400 shadow-xs'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+              }`}
+            >
+              <Folder className="w-3.5 h-3.5" />
+              Collections
+            </Link>
+
+            <Link
+              to="/achievements"
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                isActive('/achievements')
+                  ? 'bg-white dark:bg-neutral-700 text-amber-500 shadow-xs'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-amber-500'
+              }`}
+            >
+              <Trophy className="w-3.5 h-3.5 text-amber-500" />
+              Badges
+            </Link>
+
+            <Link
+              to="/community"
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                isActive('/community')
+                  ? 'bg-white dark:bg-neutral-700 text-indigo-600 dark:text-indigo-400 shadow-xs'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+              }`}
+            >
+              <Users className="w-3.5 h-3.5" />
+              Community
             </Link>
 
             <Link
               to="/ai-hub"
-              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
                 isActive('/ai-hub')
-                  ? 'bg-linear-to-r from-purple-600 to-indigo-600 text-white shadow-md shadow-purple-500/20'
+                  ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md shadow-purple-500/20'
                   : 'text-slate-600 dark:text-slate-400 hover:text-purple-600 dark:hover:text-purple-400'
               }`}
             >
-              <Sparkles className="w-4 h-4 text-purple-400 fill-purple-400/20" />
-              AI Recommendations
+              <Sparkles className="w-3.5 h-3.5 text-purple-400 fill-purple-400/20" />
+              AI Hub
             </Link>
 
             {user.role === 'admin' && (
               <Link
-                to="/admin/tasks"
-                className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                  isActive('/admin/tasks')
-                    ? 'bg-white dark:bg-neutral-700 text-blue-600 dark:text-blue-400 shadow-xs'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                to="/admin/dashboard"
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                  isActive('/admin/dashboard')
+                    ? 'bg-red-600 text-white shadow-xs'
+                    : 'text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20'
                 }`}
               >
-                <CheckSquare className="w-4 h-4" />
-                Tasks
+                <ShieldCheck className="w-3.5 h-3.5" />
+                Admin
               </Link>
             )}
           </nav>
@@ -107,7 +160,7 @@ export default function Navbar() {
                 {user.avatar ? (
                   <img src={user.avatar} alt="Avatar" className="w-7 h-7 rounded-full object-cover" />
                 ) : (
-                  <div className="w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-xs uppercase">
+                  <div className="w-7 h-7 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-xs uppercase">
                     {user.name?.[0] || 'U'}
                   </div>
                 )}
@@ -134,7 +187,7 @@ export default function Navbar() {
               </Link>
               <Link
                 to="/register"
-                className="px-4 py-2 text-xs font-bold text-white bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 rounded-xl shadow-md shadow-blue-500/20 transition-all"
+                className="px-4 py-2 text-xs font-bold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 rounded-xl shadow-md shadow-blue-500/20 transition-all"
               >
                 Get Started
               </Link>

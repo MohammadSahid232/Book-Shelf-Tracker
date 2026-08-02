@@ -1,7 +1,7 @@
 import React from 'react';
 import { Star, Heart, BookOpen, Edit3, Trash2, NotebookPen } from 'lucide-react';
 
-export default function BookCard({ book, onEdit, onDelete, onToggleFavorite, onStatusChange, onOpenNotes }) {
+export default function BookCard({ book, onEdit, onDelete, onToggleFavorite, onStatusChange, onOpenNotes, isAdmin }) {
   const isFinished = book.status === 'finished';
   const progress = book.readingProgress || (book.totalPages > 0 ? Math.round((book.currentPage / book.totalPages) * 100) : (isFinished ? 100 : 0));
 
@@ -137,7 +137,7 @@ export default function BookCard({ book, onEdit, onDelete, onToggleFavorite, onS
             </button>
           )}
 
-          {onEdit && (
+          {onEdit && isAdmin && (
             <button
               onClick={() => onEdit(book)}
               title="Edit Book"
@@ -147,7 +147,7 @@ export default function BookCard({ book, onEdit, onDelete, onToggleFavorite, onS
             </button>
           )}
 
-          {onDelete && (
+          {onDelete && isAdmin && (
             <button
               onClick={() => onDelete(book._id || book.id)}
               title="Delete Book"

@@ -11,6 +11,18 @@ import AiHubPage from './pages/AiHubPage';
 import DiscoverPage from './pages/DiscoverPage';
 import ProfilePage from './pages/ProfilePage';
 import OAuthCallback from './pages/OAuthCallback';
+
+// New Digital Library Platform Pages
+import LibraryPage from './pages/LibraryPage';
+import BookDetailPage from './pages/BookDetailPage';
+import ReaderPage from './pages/ReaderPage';
+import SearchPage from './pages/SearchPage';
+import MyLibraryPage from './pages/MyLibraryPage';
+import CollectionsPage from './pages/CollectionsPage';
+import AchievementsPage from './pages/AchievementsPage';
+import CommunityPage from './pages/CommunityPage';
+import AdminDashboard from './pages/AdminDashboard';
+
 import AdminLayout from './layouts/AdminLayout';
 import PublicLayout from './layouts/PublicLayout';
 import { AuthProvider } from './context/AuthContext';
@@ -22,13 +34,18 @@ function App() {
       <BrowserRouter>
         <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
         <Routes>
-          {/* ===== OAuth Callback (Google redirects here with ?token=&user=) ===== */}
+          {/* ===== OAuth Callback ===== */}
           <Route path="/oauth/callback" element={<OAuthCallback />} />
+
+          {/* ===== Dedicated Reader Page (Full screen, custom toolbar) ===== */}
+          <Route element={<ProtectedRoute />}>
+            <Route path="/read/:id" element={<ReaderPage />} />
+          </Route>
 
           {/* ===== Admin routes ===== */}
           <Route element={<ProtectedRoute requiredRole="admin" />}>
             <Route element={<AdminLayout />}>
-              <Route path="/admin/dashboard" element={<Dashboard />} />
+              <Route path="/admin/dashboard" element={<AdminDashboard />} />
               <Route path="/admin/tasks" element={<TaskList />} />
             </Route>
           </Route>
@@ -36,11 +53,18 @@ function App() {
           {/* ===== Authenticated user routes ===== */}
           <Route element={<ProtectedRoute />}>
             <Route element={<PublicLayout />}>
+              <Route path="/library" element={<LibraryPage />} />
+              <Route path="/book/:id" element={<BookDetailPage />} />
+              <Route path="/search" element={<SearchPage />} />
+              <Route path="/my-library" element={<MyLibraryPage />} />
+              <Route path="/collections" element={<CollectionsPage />} />
+              <Route path="/achievements" element={<AchievementsPage />} />
+              <Route path="/community" element={<CommunityPage />} />
+              <Route path="/ai-hub" element={<AiHubPage />} />
+              <Route path="/discover" element={<DiscoverPage />} />
+              <Route path="/profile" element={<ProfilePage />} />
               <Route path="/books" element={<BooksPage />} />
               <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/discover" element={<DiscoverPage />} />
-              <Route path="/ai-hub" element={<AiHubPage />} />
-              <Route path="/profile" element={<ProfilePage />} />
             </Route>
           </Route>
 
@@ -51,11 +75,9 @@ function App() {
             <Route path="/register" element={<Register />} />
           </Route>
 
-          {/* Legacy redirects */}
+          {/* Fallback redirects */}
           <Route path="/tasks" element={<Navigate to="/admin/tasks" replace />} />
-
-          {/* 404 fallback */}
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<Navigate to="/library" replace />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

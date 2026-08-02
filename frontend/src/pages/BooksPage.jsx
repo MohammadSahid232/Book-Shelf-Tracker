@@ -129,16 +129,23 @@ export default function BooksPage() {
           </p>
         </div>
 
-        <button
-          onClick={() => {
-            setEditingBook(null);
-            setIsModalOpen(true);
-          }}
-          className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-2xl shadow-md shadow-blue-500/20 transition-all flex items-center justify-center gap-2 text-xs"
-        >
-          <Plus className="w-4 h-4" />
-          Add New Book
-        </button>
+        {user?.role === 'admin' ? (
+          <button
+            onClick={() => {
+              setEditingBook(null);
+              setIsModalOpen(true);
+            }}
+            className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-2xl shadow-md shadow-blue-500/20 transition-all flex items-center justify-center gap-2 text-xs"
+          >
+            <Plus className="w-4 h-4" />
+            Add New Book
+          </button>
+        ) : (
+          <div className="flex items-center gap-2 px-3 py-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-2xl text-xs text-amber-700 dark:text-amber-400 font-medium">
+            <span>🔒</span>
+            <span>Only admins can add books</span>
+          </div>
+        )}
       </div>
 
       {/* Control Bar: Search, Filters, Sort & View Mode */}
@@ -262,6 +269,7 @@ export default function BooksPage() {
             <BookCard
               key={book._id || book.id}
               book={book}
+              isAdmin={user?.role === 'admin'}
               onEdit={(b) => {
                 setEditingBook(b);
                 setIsModalOpen(true);
@@ -274,16 +282,18 @@ export default function BooksPage() {
         </div>
       )}
 
-      {/* Book Modal */}
-      <BookModal
-        isOpen={isModalOpen}
-        onClose={() => {
-          setIsModalOpen(false);
-          setEditingBook(null);
-        }}
-        onSave={handleSaveBook}
-        editingBook={editingBook}
-      />
+      {/* Book Modal - Admin only */}
+      {user?.role === 'admin' && (
+        <BookModal
+          isOpen={isModalOpen}
+          onClose={() => {
+            setIsModalOpen(false);
+            setEditingBook(null);
+          }}
+          onSave={handleSaveBook}
+          editingBook={editingBook}
+        />
+      )}
     </div>
   );
 }

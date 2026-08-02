@@ -1,6 +1,9 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { FaColumns, FaTasks, FaBook, FaSignOutAlt } from 'react-icons/fa';
+import {
+  BookOpen, Search, BookMarked, Folder, Trophy, Users,
+  Sparkles, ShieldCheck, LogOut, CheckSquare, LayoutDashboard
+} from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export default function Sidebar({ isOpen, onClose }) {
@@ -13,22 +16,22 @@ export default function Sidebar({ isOpen, onClose }) {
   };
 
   const navItems = [
-    {
-      to: '/admin/dashboard',
-      label: 'Dashboard',
-      icon: <FaColumns className="w-4 h-4" />,
-    },
-    {
-      to: '/admin/tasks',
-      label: 'Tasks',
-      icon: <FaTasks className="w-4 h-4" />,
-    },
-    {
-      to: '/books',
-      label: 'View as Reader',
-      icon: <FaBook className="w-4 h-4" />,
-    },
+    { to: '/library', label: 'Digital Library', icon: <BookOpen className="w-4 h-4" /> },
+    { to: '/search', label: 'Search Books', icon: <Search className="w-4 h-4" /> },
+    { to: '/my-library', label: 'My Reading Shelf', icon: <BookMarked className="w-4 h-4" /> },
+    { to: '/collections', label: 'Collections', icon: <Folder className="w-4 h-4" /> },
+    { to: '/achievements', label: 'Achievements', icon: <Trophy className="w-4 h-4 text-amber-500" /> },
+    { to: '/community', label: 'Community Lists', icon: <Users className="w-4 h-4" /> },
+    { to: '/ai-hub', label: 'AI Recommendations', icon: <Sparkles className="w-4 h-4 text-purple-500" /> },
+    { to: '/discover', label: 'Google Books', icon: <Search className="w-4 h-4" /> },
   ];
+
+  if (user?.role === 'admin') {
+    navItems.unshift(
+      { to: '/admin/dashboard', label: 'Admin Dashboard', icon: <ShieldCheck className="w-4 h-4 text-red-500" /> },
+      { to: '/admin/tasks', label: 'Task Manager', icon: <CheckSquare className="w-4 h-4" /> }
+    );
+  }
 
   return (
     <>
@@ -39,8 +42,8 @@ export default function Sidebar({ isOpen, onClose }) {
         style={{ top: '65px', height: 'calc(100vh - 65px)' }}
       >
         <div className="px-3 py-6 overflow-y-auto flex-1">
-          <p className="px-3 mb-4 text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-            Control Panel
+          <p className="px-3 mb-4 text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+            Navigation
           </p>
           <ul className="space-y-1.5">
             {navItems.map((item) => {
@@ -50,9 +53,9 @@ export default function Sidebar({ isOpen, onClose }) {
                   <Link
                     to={item.to}
                     onClick={() => onClose && onClose()}
-                    className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all ${
+                    className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
                       isActive
-                        ? 'bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300 border-l-4 border-blue-600'
+                        ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300 border-l-4 border-indigo-600'
                         : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-neutral-700/50 hover:text-slate-900 dark:hover:text-white'
                     }`}
                   >
@@ -68,8 +71,8 @@ export default function Sidebar({ isOpen, onClose }) {
         {/* Footer Info inside Sidebar */}
         <div className="p-4 border-t border-slate-100 dark:border-neutral-700/50 bg-slate-50/50 dark:bg-neutral-800/50">
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center font-bold text-blue-700 dark:text-blue-300 text-sm capitalize">
-              {user?.name?.[0] || 'A'}
+            <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center font-bold text-indigo-700 dark:text-indigo-300 text-sm capitalize">
+              {user?.name?.[0] || 'U'}
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate capitalize">{user?.name}</p>
@@ -80,7 +83,7 @@ export default function Sidebar({ isOpen, onClose }) {
             onClick={handleLogout}
             className="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-bold text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/20 rounded-lg transition-colors border border-transparent hover:border-red-100 dark:hover:border-red-950/40"
           >
-            <FaSignOutAlt className="w-3.5 h-3.5" />
+            <LogOut className="w-3.5 h-3.5" />
             Sign Out
           </button>
         </div>
